@@ -8,5 +8,6 @@ import ru.practicum.shareit.item.model.Item;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ItemMapper {
     ItemDto mapToDto(Item item);
+
     Item mapToItem(ItemDto itemDto);
 }

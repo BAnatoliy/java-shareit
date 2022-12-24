@@ -39,15 +39,18 @@ public class UserRepositoryInMemory implements UserRepository {
         if (validEmailToExist(user)) {
             throw new ValidationException("This email has already exist");
         }
+
         if(!users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
         User userForUpdate = users.get(id);
         String userName = user.getName();
         String userEmail = user.getEmail();
+
         if (userName != null) {
             userForUpdate.setName(userName);
         }
+
         if (userEmail != null) {
             userForUpdate.setEmail(userEmail);
         }
@@ -61,6 +64,7 @@ public class UserRepositoryInMemory implements UserRepository {
         if(id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
+
         users.remove(id);
     }
 
@@ -69,6 +73,7 @@ public class UserRepositoryInMemory implements UserRepository {
         if(id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
+
         return users.get(id);
     }
 
@@ -81,6 +86,7 @@ public class UserRepositoryInMemory implements UserRepository {
         if(ownerId == null || !users.containsKey(ownerId)) {
             throw new EntityNotFoundException("User not found");
         }
+
         if (itemsByOwner.containsKey(ownerId)) {
             itemsByOwner.get(ownerId).add(itemId);
         } else {

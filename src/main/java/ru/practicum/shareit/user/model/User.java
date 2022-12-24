@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class User {
     @EqualsAndHashCode.Exclude
-    private Long Id;
+    private Long id;
     private String email;
     private String name;
 }

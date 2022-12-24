@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
 public class UserDto {
     @Min(1)
     @EqualsAndHashCode.Exclude
-    private Long Id;
+    private Long id;
     @NotNull(groups = UserValidGroups.OnCreate.class)
     @Email(groups = {UserValidGroups.OnCreate.class, UserValidGroups.OnUpdate.class})
     private String email;

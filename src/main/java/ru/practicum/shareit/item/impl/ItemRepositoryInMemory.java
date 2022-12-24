@@ -20,9 +20,11 @@ public class ItemRepositoryInMemory implements ItemRepository {
     @Override
     public Item createItem(Item item) {
         item.setId(itemId);
+
         if(items.containsValue(item)) {
             throw new ValidationException("This item has already created");
         }
+
         items.put(item.getId(), item);
         generatedId();
         return item;
@@ -33,6 +35,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
         if(!items.containsKey(itemId)) {
             throw new EntityNotFoundException("Item not found");
         }
+
         Item itemForUpdate = items.get(itemId);
         String itemName = item.getName();
         String itemDescription = item.getDescription();
@@ -43,9 +46,11 @@ public class ItemRepositoryInMemory implements ItemRepository {
         if (itemName != null) {
             itemForUpdate.setName(itemName);
         }
+
         if (itemDescription != null) {
             itemForUpdate.setDescription(itemDescription);
         }
+
         if (available != null) {
             itemForUpdate.setAvailable(available);
         }

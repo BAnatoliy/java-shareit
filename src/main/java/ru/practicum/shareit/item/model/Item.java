@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class Item {
     @EqualsAndHashCode.Exclude
-    private Long Id;
+    private Long id;
     private String name;
     private String description;
     private Boolean available;

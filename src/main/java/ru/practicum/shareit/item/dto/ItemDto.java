@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 public class ItemDto {
     @Min(1)
     @EqualsAndHashCode.Exclude
-    private Long Id;
+    private Long id;
     @NotBlank(groups = ItemValidGroups.OnCreate.class)
     @NotNull(groups = ItemValidGroups.OnCreate.class)
     @Size(max = 50, groups = {ItemValidGroups.OnCreate.class, ItemValidGroups.OnUpdate.class})
