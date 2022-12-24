@@ -26,7 +26,7 @@ public class UserRepositoryInMemory implements UserRepository {
         if (validEmailToExist(user)) {
             throw new ValidationException("This email has already exist");
         }
-        if(users.containsValue(user)) {
+        if (users.containsValue(user)) {
             throw new ValidationException("This user has already created");
         }
         users.put(user.getId(), user);
@@ -39,29 +39,25 @@ public class UserRepositoryInMemory implements UserRepository {
         if (validEmailToExist(user)) {
             throw new ValidationException("This email has already exist");
         }
-
-        if(!users.containsKey(id)) {
+        if (!users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
         User userForUpdate = users.get(id);
         String userName = user.getName();
         String userEmail = user.getEmail();
-
         if (userName != null) {
             userForUpdate.setName(userName);
         }
-
         if (userEmail != null) {
             userForUpdate.setEmail(userEmail);
         }
-
         users.put(id, userForUpdate);
         return userForUpdate;
     }
 
     @Override
     public void deleteUser(Long id) {
-        if(id == null || !users.containsKey(id)) {
+        if (id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
 
@@ -70,7 +66,7 @@ public class UserRepositoryInMemory implements UserRepository {
 
     @Override
     public User getUserById(Long id) {
-        if(id == null || !users.containsKey(id)) {
+        if (id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
         }
 
@@ -83,10 +79,9 @@ public class UserRepositoryInMemory implements UserRepository {
     }
 
     public void addItemByOwner(Long ownerId, Long itemId) {
-        if(ownerId == null || !users.containsKey(ownerId)) {
+        if (ownerId == null || !users.containsKey(ownerId)) {
             throw new EntityNotFoundException("User not found");
         }
-
         if (itemsByOwner.containsKey(ownerId)) {
             itemsByOwner.get(ownerId).add(itemId);
         } else {
