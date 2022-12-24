@@ -3,14 +3,15 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping(path = "/users")
@@ -42,7 +43,6 @@ public class UserController {
                 .stream()
                 .map(userMapper::mapToUserDto)
                 .collect(Collectors.toList());
-                //userMapper.mapToUserDto(userService.getAllUsers());
     }
 
     @PatchMapping("/{id}")

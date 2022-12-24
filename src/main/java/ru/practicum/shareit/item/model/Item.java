@@ -1,7 +1,21 @@
 package ru.practicum.shareit.item.model;
 
-/**
- * TODO Sprint add-controllers.
- */
+import lombok.*;
+import ru.practicum.shareit.user.model.User;
+
+import javax.validation.constraints.NotNull;
+
+@Setter
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor
 public class Item {
+    @EqualsAndHashCode.Exclude
+    private Long Id;
+    private String name;
+    private String description;
+    private Boolean available;
+    @NotNull
+    private User owner;
 }

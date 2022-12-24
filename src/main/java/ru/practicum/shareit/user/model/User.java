@@ -1,10 +1,7 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.model;
 
 import lombok.*;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Setter
 @Getter
 @ToString

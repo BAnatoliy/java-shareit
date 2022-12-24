@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.ArrayList;
@@ -16,6 +16,8 @@ import java.util.Map;
 @Slf4j
 public class UserRepositoryInMemory implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
+    private final Map<Long, List<Long>> itemsByOwner = new HashMap<>();
+
     private long userId = 1;
 
     @Override
@@ -73,6 +75,24 @@ public class UserRepositoryInMemory implements UserRepository {
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
+    }
+
+    public void addItemByOwner(Long ownerId, Long itemId) {
+        if(ownerId == null || !users.containsKey(ownerId)) {
+            throw new EntityNotFoundException("User not found");
+        }
+        if (itemsByOwner.containsKey(ownerId)) {
+            itemsByOwner.get(ownerId).add(itemId);
+        } else {
+            itemsByOwner.put(ownerId, new ArrayList<>(List.of(itemId)));
+        }
+    }
+
+    public List<Long> getItemsIdByTheOwner(Long ownerId) {
+        if (!itemsByOwner.containsKey(ownerId)) {
+            throw new EntityNotFoundException("User not found");
+        }
+        return itemsByOwner.get(ownerId);
     }
 
     private void generatedId() {

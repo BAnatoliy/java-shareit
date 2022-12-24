@@ -1,6 +1,7 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.dto;
 
 import lombok.*;
+import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import javax.validation.constraints.*;
 

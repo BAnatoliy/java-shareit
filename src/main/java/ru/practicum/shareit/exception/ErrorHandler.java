@@ -24,4 +24,9 @@ public class ErrorHandler {
         return new ErrorResponse("Validation error", e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleValidationException(final EntityNotFoundException e) {
+        return new ErrorResponse("Entity error", e.getMessage());
+    }
 }
