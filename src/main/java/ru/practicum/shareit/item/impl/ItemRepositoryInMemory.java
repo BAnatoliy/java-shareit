@@ -21,7 +21,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
     public Item createItem(Item item) {
         item.setId(itemId);
 
-        if(items.containsValue(item)){
+        if (items.containsValue(item)) {
             throw new ValidationException("This item has already created");
         }
 
