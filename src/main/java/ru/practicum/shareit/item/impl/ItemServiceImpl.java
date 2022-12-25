@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
