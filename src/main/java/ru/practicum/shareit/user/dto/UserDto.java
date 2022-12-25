@@ -5,10 +5,7 @@ import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import javax.validation.constraints.*;
 
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode
+@Data
 @AllArgsConstructor
 public class UserDto {
     @Min(1)
