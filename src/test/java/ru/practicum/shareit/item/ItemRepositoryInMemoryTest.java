@@ -27,11 +27,11 @@ public class ItemRepositoryInMemoryTest {
     private ConfigurableApplicationContext context;
     private final Gson gson = new GsonBuilder().create();
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String URL = "http://localhost:8080/items";
-    private final String HEADER_USER_ID = "X-Sharer-User-Id";
-    private final String HEADER_CONTENT_TYPE = "Content-Type";
+    private final String url = "http://localhost:8080/items";
+    private final String headerUserId = "X-Sharer-User-Id";
+    private final String headerContentType = "Content-Type";
     private final String VALUE_CONTENT_TYPE = "application/json";
-    private final String PATH_SEARCH_WITH_PARAMETER = "http://localhost:8080/items/search?text=";
+    private final String pathSearchWithParameter = "http://localhost:8080/items/search?text=";
 
 
     @BeforeEach
@@ -58,7 +58,7 @@ public class ItemRepositoryInMemoryTest {
         assertAll(() -> {
                     assertEquals(200, response1.statusCode());
                     assertEquals(200, response2.statusCode());
-                    assertEquals(2, getItemsRequest(URL, "1").size());
+                    assertEquals(2, getItemsRequest(url, "1").size());
                 });
 
         itemDto.setName("Рубанок");
@@ -83,7 +83,7 @@ public class ItemRepositoryInMemoryTest {
         HttpResponse<String> response6 = sengPostRequest(json6, "1");
         assertEquals(400, response6.statusCode());
 
-        assertEquals(2, getItemsRequest(URL, "1").size());
+        assertEquals(2, getItemsRequest(url, "1").size());
     }
 
     @Test
@@ -134,12 +134,12 @@ public class ItemRepositoryInMemoryTest {
         ItemDto itemDto2 = getItemById("3", "2");
         assertEquals(3, itemDto2.getId());
 
-        HttpRequest request_With_Wrong_User_Id = HttpRequest.newBuilder().uri(URI.create(URL + "/" + "333"))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, "1").GET().build();
-        HttpResponse<String> response_With_Wrong_User_Id = client.send(request_With_Wrong_User_Id,
+        HttpRequest requestWithWrongUserId = HttpRequest.newBuilder().uri(URI.create(url + "/" + "333"))
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, "1").GET().build();
+        HttpResponse<String> responseWithWrongUserId = client.send(requestWithWrongUserId,
                 HttpResponse.BodyHandlers.ofString());
-        assertEquals(404, response_With_Wrong_User_Id.statusCode());
+        assertEquals(404, responseWithWrongUserId.statusCode());
     }
 
     @Test
@@ -147,15 +147,15 @@ public class ItemRepositoryInMemoryTest {
     public void get_The_Owners_Items() throws IOException, InterruptedException {
         create_Two_Items_For_User_Id1_And_One_Item_For_User_Id2();
 
-        assertEquals(2, getItemsRequest(URL, "1").size());
-        assertEquals(1, getItemsRequest(URL, "2").size());
+        assertEquals(2, getItemsRequest(url, "1").size());
+        assertEquals(1, getItemsRequest(url, "2").size());
 
-        HttpRequest request_With_Wrong_User_Id = HttpRequest.newBuilder().uri(URI.create(URL))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, "111").GET().build();
-        HttpResponse<String> response_With_Wrong_User_Id = client.send(request_With_Wrong_User_Id,
+        HttpRequest requestWithWrongUserId = HttpRequest.newBuilder().uri(URI.create(url))
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, "111").GET().build();
+        HttpResponse<String> responseWithWrongUserId = client.send(requestWithWrongUserId,
                 HttpResponse.BodyHandlers.ofString());
-        assertEquals(404, response_With_Wrong_User_Id.statusCode());
+        assertEquals(404, responseWithWrongUserId.statusCode());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class ItemRepositoryInMemoryTest {
     public void get_Available_Item_Test() throws IOException, InterruptedException {
         create_Two_Items_For_User_Id1_And_One_Item_For_User_Id2();
 
-        List<ItemDto> itemsRequest1 = getItemsRequest(PATH_SEARCH_WITH_PARAMETER + "рель", "1");
+        List<ItemDto> itemsRequest1 = getItemsRequest(pathSearchWithParameter + "рель", "1");
         assertEquals(0, itemsRequest1.size());
 
         ItemDto itemDto = new ItemDto();
@@ -173,10 +173,10 @@ public class ItemRepositoryInMemoryTest {
         sengPatchRequest(json, "2", "1");
         sengPatchRequest(json, "3", "2");
 
-        List<ItemDto> itemsRequest2 = getItemsRequest(PATH_SEARCH_WITH_PARAMETER + "рель", "1");
+        List<ItemDto> itemsRequest2 = getItemsRequest(pathSearchWithParameter + "рель", "1");
         assertEquals(1, itemsRequest2.size());
 
-        List<ItemDto> itemsRequest3 = getItemsRequest(PATH_SEARCH_WITH_PARAMETER + "ру", "1");
+        List<ItemDto> itemsRequest3 = getItemsRequest(pathSearchWithParameter + "ру", "1");
         assertAll(() -> {
             assertEquals(2, itemsRequest3.size());
             assertTrue(itemsRequest3.get(0).getName().toLowerCase().contains("ру"));
@@ -191,24 +191,24 @@ public class ItemRepositoryInMemoryTest {
 
     private HttpResponse<String> sengPostRequest(String json, String userId) throws IOException, InterruptedException {
         HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, userId).POST(body).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, userId).POST(body).build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private HttpResponse<String> sengPatchRequest(String json, String itemId, String userId) throws IOException, InterruptedException {
         HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL + "/" + itemId))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, userId).method("PATCH", body).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/" + itemId))
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, userId).method("PATCH", body).build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private ItemDto getItemById(String itemId, String userId) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL + "/" + itemId))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, userId).GET().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/" + itemId))
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, userId).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), ItemDto.class);
     }
@@ -216,8 +216,8 @@ public class ItemRepositoryInMemoryTest {
     private List<ItemDto> getItemsRequest(String url, String userId) throws IOException, InterruptedException {
         Type type = new TypeToken<List<ItemDto>>() {}.getType();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
-                .header(HEADER_USER_ID, userId).GET().build();
+                .header(headerContentType, VALUE_CONTENT_TYPE)
+                .header(headerUserId, userId).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), type);
     }
@@ -225,7 +225,7 @@ public class ItemRepositoryInMemoryTest {
     private void createUserRequest(String json) throws IOException, InterruptedException {
         HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/users"))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE).POST(body).build();
+                .header(headerContentType, VALUE_CONTENT_TYPE).POST(body).build();
         client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 

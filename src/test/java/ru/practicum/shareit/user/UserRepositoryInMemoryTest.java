@@ -27,9 +27,9 @@ public class UserRepositoryInMemoryTest {
     private ConfigurableApplicationContext context;
     private final Gson gson = new GsonBuilder().create();
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String URL = "http://localhost:8080/users";
-    private final String HEADER_CONTENT_TYPE = "Content-Type";
-    private final String VALUE_CONTENT_TYPE = "application/json";
+    private final String url = "http://localhost:8080/users";
+    private final String headerContentType = "Content-Type";
+    private final String valueContentType = "application/json";
 
     @BeforeEach
     public void init() {
@@ -100,7 +100,7 @@ public class UserRepositoryInMemoryTest {
         userDtoToUpdate.setEmail("Leon@yandex.ru");
         userDtoToUpdate.setName("Leonard");
         String json2 = gson.toJson(userDtoToUpdate);
-        HttpResponse<String> response1 = sendPatchRequest(json2, URI.create(URL + "/1"));
+        HttpResponse<String> response1 = sendPatchRequest(json2, URI.create(url + "/1"));
 
         assertAll(() -> {
             assertEquals(200, response1.statusCode());
@@ -119,13 +119,13 @@ public class UserRepositoryInMemoryTest {
         sendPostRequest(json1);
         assertEquals(1, getListUsers().size());
 
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL + "/1"))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE).GET().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/1"))
+                .header(headerContentType, valueContentType).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         UserDto responseUser1 = gson.fromJson(response.body(), UserDto.class);
 
-        HttpRequest request2 = HttpRequest.newBuilder().uri(URI.create(URL + "/2"))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE).GET().build();
+        HttpRequest request2 = HttpRequest.newBuilder().uri(URI.create(url + "/2"))
+                .header(headerContentType, valueContentType).GET().build();
         HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
 
         assertAll(() -> {
@@ -207,27 +207,27 @@ public class UserRepositoryInMemoryTest {
 
     private HttpResponse<String> sendPostRequest(String json) throws IOException, InterruptedException {
         HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL)).header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header(headerContentType, valueContentType)
                 .POST(body).build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private HttpResponse<String> sendPatchRequest(String json, URI uri) throws IOException, InterruptedException {
         HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE)
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).header(headerContentType, valueContentType)
                 .method("PATCH", body).build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private HttpResponse<String> sendDeleteRequest(String id) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL + id)).DELETE().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + id)).DELETE().build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private List<UserDto> getListUsers() throws IOException, InterruptedException {
         Type type = new TypeToken<List<UserDto>>(){}.getType();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(URL))
-                .header(HEADER_CONTENT_TYPE, VALUE_CONTENT_TYPE).GET().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
+                .header(headerContentType, valueContentType).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return gson.fromJson(response.body(), type);
     }
