@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
     @Min(1)
