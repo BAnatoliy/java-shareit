@@ -1,9 +1,10 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item;
 
-import lombok.*;
-import ru.practicum.shareit.item.valid.ItemValidGroups;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -12,8 +13,6 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
-    @Min(1)
-    @EqualsAndHashCode.Exclude
     private Long id;
     @NotBlank(groups = ItemValidGroups.OnCreate.class)
     @NotNull(groups = ItemValidGroups.OnCreate.class)
@@ -24,4 +23,6 @@ public class ItemDto {
     private String description;
     @NotNull(groups = ItemValidGroups.OnCreate.class)
     private Boolean available;
+    @NotNull(groups = ItemValidGroups.OnCreate.class)
+    private User user;
 }

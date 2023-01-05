@@ -1,11 +1,8 @@
-package ru.practicum.shareit.item.impl;
+package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
@@ -25,7 +22,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item createItem(Item item, Long userId) {
-        item.setOwner(userRepository.getUserById(userId));
+        item.setUser(userRepository.getUserById(userId));
         Item itemToResponse = itemRepository.createItem(item);
         userRepository.addItemByOwner(userId, itemToResponse.getId());
         return itemToResponse;
@@ -36,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
         if (!validItemsOwner(itemId, userId)) {
             throw new EntityNotFoundException("This item belongs to other owner");
         }
-        item.setOwner(userRepository.getUserById(userId));
+        item.setUser(userRepository.getUserById(userId));
         return itemRepository.updateItem(item, itemId);
     }
 

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.ArrayList;
@@ -12,15 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Repository
-@Slf4j
-public class UserRepositoryInMemory implements UserRepository {
+//@Repository
+//@Slf4j
+public class UserRepositoryInMemory {
     private final Map<Long, User> users = new HashMap<>();
     private final Map<Long, List<Long>> itemsByOwner = new HashMap<>();
 
     private long userId = 1;
 
-    @Override
+    //@Override
     public User createUser(User user) {
         user.setId(userId);
         if (validEmailToExist(user)) {
@@ -34,7 +34,7 @@ public class UserRepositoryInMemory implements UserRepository {
         return user;
     }
 
-    @Override
+    //@Override
     public User updateUser(Long id, User user) {
         if (validEmailToExist(user)) {
             throw new ValidationException("This email has already exist");
@@ -55,7 +55,7 @@ public class UserRepositoryInMemory implements UserRepository {
         return userForUpdate;
     }
 
-    @Override
+    //@Override
     public void deleteUser(Long id) {
         if (id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
@@ -64,7 +64,7 @@ public class UserRepositoryInMemory implements UserRepository {
         users.remove(id);
     }
 
-    @Override
+    //@Override
     public User getUserById(Long id) {
         if (id == null || !users.containsKey(id)) {
             throw new EntityNotFoundException("User not found");
@@ -73,7 +73,7 @@ public class UserRepositoryInMemory implements UserRepository {
         return users.get(id);
     }
 
-    @Override
+    //@Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }

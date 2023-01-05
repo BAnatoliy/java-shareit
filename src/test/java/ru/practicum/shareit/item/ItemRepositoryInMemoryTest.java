@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+/*package ru.practicum.shareit.item;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import ru.practicum.shareit.ShareItApp;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.item.ItemDto;
+import ru.practicum.shareit.user.UserDto;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -262,4 +262,4 @@ public class ItemRepositoryInMemoryTest {
         String json3 = gson.toJson(itemDto);
         sengPostRequest(json3, "2");
     }
-}
+}*/

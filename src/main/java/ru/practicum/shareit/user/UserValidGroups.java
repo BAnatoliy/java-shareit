@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.valid;
+package ru.practicum.shareit.user;
 
 public interface UserValidGroups {
     interface OnCreate {}

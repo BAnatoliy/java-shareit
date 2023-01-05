@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.valid;
+package ru.practicum.shareit.item;
 
 public interface ItemValidGroups {
     interface OnCreate {}

@@ -4,20 +4,20 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Repository
-public class ItemRepositoryInMemory implements ItemRepository {
+//@Repository
+public class ItemRepositoryInMemory {
     private final Map<Long, Item> items = new HashMap<>();
     private long itemId = 1;
 
-    @Override
+    //@Override
     public Item createItem(Item item) {
         item.setId(itemId);
         if (items.containsValue(item)) {
@@ -28,7 +28,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
         return item;
     }
 
-    @Override
+    //@Override
     public Item updateItem(Item item, Long itemId) {
         if (!items.containsKey(itemId)) {
             throw new EntityNotFoundException("Item not found");
@@ -37,8 +37,8 @@ public class ItemRepositoryInMemory implements ItemRepository {
         String itemName = item.getName();
         String itemDescription = item.getDescription();
         Boolean available = item.getAvailable();
-        User itemOwner = item.getOwner();
-        itemForUpdate.setOwner(itemOwner);
+        User itemOwner = item.getUser();
+        itemForUpdate.setUser(itemOwner);
         if (itemName != null) {
             itemForUpdate.setName(itemName);
         }
@@ -52,7 +52,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
         return itemForUpdate;
     }
 
-    @Override
+    //@Override
     public Item getItemById(Long itemId) {
         if (itemId == null || !items.containsKey(itemId)) {
             throw new EntityNotFoundException("Item not found");
@@ -60,7 +60,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
         return items.get(itemId);
     }
 
-    @Override
+    //@Override
     public List<Item> getAvailableItem(String text) {
         List<Item> availableItems = new ArrayList<>();
         if (!text.isBlank()) {
