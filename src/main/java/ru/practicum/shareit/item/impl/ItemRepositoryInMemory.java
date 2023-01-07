@@ -1,11 +1,9 @@
 package ru.practicum.shareit.item.impl;
 
-import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,8 +35,8 @@ public class ItemRepositoryInMemory {
         String itemName = item.getName();
         String itemDescription = item.getDescription();
         Boolean available = item.getAvailable();
-        User itemOwner = item.getUser();
-        itemForUpdate.setUser(itemOwner);
+        User itemOwner = item.getOwner();
+        itemForUpdate.setOwner(itemOwner);
         if (itemName != null) {
             itemForUpdate.setName(itemName);
         }

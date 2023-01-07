@@ -1,14 +1,16 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Setter @Getter
+@Setter @Getter @ToString
 @AllArgsConstructor @NoArgsConstructor
 @Entity
 @Table(name = "users")
@@ -18,8 +20,12 @@ public class User {
     private Long id;
     private String email;
     private String name;
-    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    @OneToMany(mappedBy = "owner")
     private Set<Item> items = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "booker")
+    private Set<Booking> bookings = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

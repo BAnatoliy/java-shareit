@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.item.model.Item;
+
 import java.util.List;
 
 public interface ItemService {
@@ -12,5 +14,4 @@ public interface ItemService {
     List<Item> getItemsByTheOwner(Long userId);
 
     List<Item> getAvailableItem(String text);
-
 }

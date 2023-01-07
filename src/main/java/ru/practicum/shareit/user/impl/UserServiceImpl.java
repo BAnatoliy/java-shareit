@@ -1,11 +1,12 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -14,11 +15,9 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
 
-    public UserServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
     }
 
     @Transactional
@@ -39,20 +38,28 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User updateUser(User user) {
-        User oldUser = userRepository.findById(user.getId()).orElseThrow(
-                () -> new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong", user.getId())));
+    public User updateUser(User user, Long userId) {
+        User oldUser = userRepository.findById(userId).orElseThrow(
+                () -> {
+                    log.debug("User with ID = {} is found", userId);
+                    return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
+                            userId));
+                });
+        String userEmail = user.getEmail();
+        String userName = user.getName();
 
-        if (user.getEmail().isBlank() || user.getName().isBlank()) {
-            throw new ValidationException("Email and name cannot be empty");
-        }
-        if (user.getEmail() != null) {
+        if (userEmail != null) {
+            if (userEmail.isBlank()) {
+                throw new ValidationException("Email cannot be empty");
+            }
             oldUser.setEmail(user.getEmail());
         }
-        if (user.getName() != null) {
+        if (userName != null) {
+            if (userName.isBlank()) {
+                throw new ValidationException("Name cannot be empty");
+            }
             oldUser.setName(user.getName());
         }
-
         userRepository.save(oldUser);
         log.debug("User updated");
         return oldUser;

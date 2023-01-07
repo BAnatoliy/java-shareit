@@ -3,6 +3,10 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -44,9 +48,8 @@ public class UserController {
     @PatchMapping("/{id}")
     @Validated(UserValidGroups.OnUpdate.class)
     public UserDto updateUser(@PathVariable Long id, @RequestBody @Valid UserDto userDto) {
-        userDto.setId(id);
         User user = userMapper.mapToUser(userDto);
-        return userMapper.mapToUserDto(userService.updateUser(user));
+        return userMapper.mapToUserDto(userService.updateUser(user, id));
     }
 
     @DeleteMapping("/{id}")
