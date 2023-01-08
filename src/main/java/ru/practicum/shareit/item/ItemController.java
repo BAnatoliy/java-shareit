@@ -27,7 +27,8 @@ public class ItemController {
 
     @PostMapping
     @Validated(ItemValidGroups.OnCreate.class)
-    public ItemDto createItem(@RequestBody @Valid ItemDto itemDto, @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
+    public ItemDto createItem(@RequestBody @Valid ItemDto itemDto,
+                              @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
         Item item = itemMapper.mapToItem(itemDto);
         return itemMapper.mapToDto(itemService.createItem(item, userId));
     }

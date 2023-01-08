@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Setter @Getter @ToString
+@Setter @Getter
 @AllArgsConstructor @NoArgsConstructor
 @Entity
 @Table(name = "bookings")

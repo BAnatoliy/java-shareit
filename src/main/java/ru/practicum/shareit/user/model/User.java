@@ -1,7 +1,10 @@
 package ru.practicum.shareit.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 
@@ -10,7 +13,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Setter @Getter @ToString
+@Setter @Getter
 @AllArgsConstructor @NoArgsConstructor
 @Entity
 @Table(name = "users")
