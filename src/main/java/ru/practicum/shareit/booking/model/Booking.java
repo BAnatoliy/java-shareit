@@ -22,7 +22,7 @@ public class Booking {
     private LocalDateTime start;
     @Column(name = "end_booking")
     private LocalDateTime end;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private BookingStatus status;
     @ManyToOne
     @JoinColumn(name = "user_id")

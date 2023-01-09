@@ -47,8 +47,14 @@ public class ErrorHandler {
 
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleItemUnavailableException(final ItemUnavailableException e) {
+    public ErrorResponse handleItemUnavailableException(final ItemCheckException e) {
         return new ErrorResponse("Booking valid error", e.getMessage());
+    }
+
+    @ExceptionHandler()
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBookingAlreadyApprovedException(final BookingApprovedException e) {
+        return new ErrorResponse("Booking is already approved", e.getMessage());
     }
 
     @ExceptionHandler()

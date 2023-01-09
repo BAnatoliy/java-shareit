@@ -7,17 +7,18 @@ import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.constant.BookingStatus;
 import ru.practicum.shareit.booking.constant.State;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.BookingApprovedException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.ItemUnavailableException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.ItemCheckException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -41,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
                     itemId));
         });
         if (!item.getAvailable()) {
-            throw new ItemUnavailableException();
+            throw new ItemCheckException("Item is unavailable");
         }
 
         User booker = userRepository.findById(userId).orElseThrow(() -> {
@@ -50,13 +51,17 @@ public class BookingServiceImpl implements BookingService {
                     userId));
         });
 
+        if (item.getOwner().getId().equals(userId)) {
+            throw new EntityNotFoundException("Owner cannot book him item");
+
+        }
+
         booking.setItem(item);
         booking.setBooker(booker);
         booking.setStatus(BookingStatus.WAITING);
 
         log.debug("Booking created");
-        bookingRepository.save(booking);
-        return booking;
+        return bookingRepository.save(booking);
     }
 
     @Override
@@ -67,7 +72,10 @@ public class BookingServiceImpl implements BookingService {
                     bookingId));
         });
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException("User is not the owner of the item");
+            throw new EntityNotFoundException("User is not the owner of the item");
+        }
+        if (booking.getStatus().equals(BookingStatus.APPROVED)) {
+            throw new BookingApprovedException("Booking is approved");
         }
 
         if (approved) {
@@ -91,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getItem().getOwner().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
             return booking;
         } else {
-            throw new ValidationException("User is not the owner of the item or booking has other booker");
+            throw new EntityNotFoundException("User is not the owner of the item or booking has other booker");
         }
     }
 
@@ -103,26 +111,69 @@ public class BookingServiceImpl implements BookingService {
                     userId));
         });
 
+        LocalDateTime now = LocalDateTime.now();
+
         switch (state) {
             case ALL:
                 return bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
             case PAST:
-                return bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                return bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, now);
             case FUTURE:
-                return bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                return bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now);
             case CURRENT:
-                return bookingRepository.findAllByBooker_IdAndEndAfterOrderByStartDesc(userId, LocalDateTime.now());
+                return bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(userId, now, now);
             case WAITING:
-                return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                return bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId, BookingStatus.WAITING);
             case REJECTED:
-                return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                return bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId, BookingStatus.REJECTED);
             default:
-                throw new ValidationException(String.format("Unknown state: %s", state));
+                return null;
         }
     }
 
     @Override
     public List<Booking> getBookingByOwner(State state, Long userId) {
-        return null;
+        userRepository.findById(userId).orElseThrow(() -> {
+            log.debug("User with ID = {} is found", userId);
+            return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
+                    userId));
+        });
+
+        List<Booking> bookingList =
+                bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        switch (state) {
+            case ALL:
+                return bookingList;
+            case PAST:
+                return bookingList.stream()
+                        .filter(booking -> booking.getEnd().isBefore(now))
+                        .sorted(Comparator.comparing(Booking::getStart))
+                        .collect(Collectors.toList());
+            case FUTURE:
+                return bookingList.stream()
+                        .filter(booking -> booking.getStart().isAfter(now))
+                        .sorted(Comparator.comparing(Booking::getStart))
+                        .collect(Collectors.toList());
+            case CURRENT:
+                 return bookingList.stream()
+                    .filter(booking -> booking.getEnd().isAfter(now) && booking.getStart().isBefore(now))
+                         .sorted(Comparator.comparing(Booking::getStart))
+                         .collect(Collectors.toList());
+            case WAITING:
+                return bookingList.stream()
+                        .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING))
+                        .sorted(Comparator.comparing(Booking::getStart))
+                        .collect(Collectors.toList());
+            case REJECTED:
+                return bookingList.stream()
+                        .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED))
+                        .sorted(Comparator.comparing(Booking::getStart))
+                        .collect(Collectors.toList());
+            default:
+                return null;
+        }
     }
 }
