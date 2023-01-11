@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.model.Booking;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface BookingMapper {
-
     BookingDto mapToDto(Booking booking);
+
     Booking mapToBooking(BookingRequestDto bookingRequestDto);
 }

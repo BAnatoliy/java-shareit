@@ -60,36 +60,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(booker);
         booking.setStatus(BookingStatus.WAITING);
 
-        log.debug("Booking created");
         Booking bookingResponse = bookingRepository.save(booking);
-/*
-
-        boolean isItemLastBooking_Null = item.getLastBooking() == null;
-        boolean isBooking_Before_Now = bookingResponse.getStart().isBefore(LocalDateTime.now());
-        boolean isItemLastBooking_After_Booking = false;
-        if(!isItemLastBooking_Null) {
-            isItemLastBooking_After_Booking = item.getLastBooking().getStart().isAfter(bookingResponse.getStart());
-        }
-
-        if ((isItemLastBooking_Null && isBooking_Before_Now) ||
-                (!isItemLastBooking_Null && isItemLastBooking_After_Booking && isBooking_Before_Now)) {
-            item.setLastBooking(bookingResponse);
-        }
-
-        boolean isItemNextBooking_Null = item.getNextBooking() == null;
-        boolean isItemNextBooking_After_Booking = false;
-        if (!isItemNextBooking_Null) {
-            isItemNextBooking_After_Booking = item.getNextBooking().getStart().isAfter(bookingResponse.getStart());
-        }
-
-        if ((isItemNextBooking_Null && !isBooking_Before_Now) ||
-                (!isItemNextBooking_Null && isItemNextBooking_After_Booking && !isBooking_Before_Now)) {
-            item.setLastBooking(bookingResponse);
-        }
-
-        itemRepository.save(item);
-*/
-
+        log.debug("Booking created");
         return bookingResponse;
     }
 
@@ -115,7 +87,9 @@ public class BookingServiceImpl implements BookingService {
             log.debug("Booking status is updated on rejected");
         }
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        log.debug("Booking update after approve or rejected");
+        return savedBooking;
     }
 
     @Override
@@ -141,7 +115,6 @@ public class BookingServiceImpl implements BookingService {
         });
 
         LocalDateTime now = LocalDateTime.now();
-
         switch (state) {
             case ALL:
                 return bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
@@ -187,10 +160,10 @@ public class BookingServiceImpl implements BookingService {
                         .sorted(Comparator.comparing(Booking::getStart))
                         .collect(Collectors.toList());
             case CURRENT:
-                 return bookingList.stream()
-                    .filter(booking -> booking.getEnd().isAfter(now) && booking.getStart().isBefore(now))
-                         .sorted(Comparator.comparing(Booking::getStart))
-                         .collect(Collectors.toList());
+                return bookingList.stream()
+                        .filter(booking -> booking.getEnd().isAfter(now) && booking.getStart().isBefore(now))
+                        .sorted(Comparator.comparing(Booking::getStart))
+                        .collect(Collectors.toList());
             case WAITING:
                 return bookingList.stream()
                         .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING))

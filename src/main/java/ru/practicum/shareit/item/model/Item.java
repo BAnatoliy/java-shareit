@@ -13,8 +13,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Setter @Getter
-@AllArgsConstructor @NoArgsConstructor
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "items")
 public class Item {

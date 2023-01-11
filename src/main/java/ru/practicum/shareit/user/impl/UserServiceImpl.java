@@ -60,9 +60,9 @@ public class UserServiceImpl implements UserService {
             }
             oldUser.setName(user.getName());
         }
-        userRepository.save(oldUser);
+        User savedUser = userRepository.save(oldUser);
         log.debug("User updated");
-        return oldUser;
+        return savedUser;
     }
 
     @Transactional
@@ -74,7 +74,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
+        List<User> userList = userRepository.findAll();
         log.debug("Get user`s list");
-        return userRepository.findAll();
+        return userList;
     }
 }

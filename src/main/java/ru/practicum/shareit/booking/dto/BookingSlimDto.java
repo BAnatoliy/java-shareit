@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.constant.BookingStatus;
-import ru.practicum.shareit.user.dto.UserSlimDto;
 
 import java.time.LocalDateTime;
 
