@@ -152,27 +152,27 @@ public class BookingServiceImpl implements BookingService {
             case PAST:
                 return bookingList.stream()
                         .filter(booking -> booking.getEnd().isBefore(now))
-                        .sorted(Comparator.comparing(Booking::getStart))
+                        .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
             case FUTURE:
                 return bookingList.stream()
                         .filter(booking -> booking.getStart().isAfter(now))
-                        .sorted(Comparator.comparing(Booking::getStart))
+                        .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingList.stream()
                         .filter(booking -> booking.getEnd().isAfter(now) && booking.getStart().isBefore(now))
-                        .sorted(Comparator.comparing(Booking::getStart))
+                        .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
             case WAITING:
                 return bookingList.stream()
                         .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING))
-                        .sorted(Comparator.comparing(Booking::getStart))
+                        .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
             case REJECTED:
                 return bookingList.stream()
                         .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED))
-                        .sorted(Comparator.comparing(Booking::getStart))
+                        .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
             default:
                 return null;
