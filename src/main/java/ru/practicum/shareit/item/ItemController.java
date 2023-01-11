@@ -3,8 +3,11 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.valid.ItemValidGroups;
 
@@ -55,5 +58,12 @@ public class ItemController {
     public List<ItemDto> getAvailableItem(@RequestParam(value = "text") String text,
                                           @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
         return itemService.getAvailableItem(text).stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestBody CommentRequestDto commentRequestDtoDto, @PathVariable Long itemId,
+                                    @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
+        Comment comment = itemMapper.mapToComment(commentRequestDtoDto);
+        return itemMapper.mapToCommentDto(itemService.createComment(comment, itemId, userId));
     }
 }

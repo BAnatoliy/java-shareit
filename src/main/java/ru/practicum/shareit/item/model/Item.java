@@ -36,6 +36,9 @@ public class Item {
     @JsonIgnore
     @OneToMany(mappedBy = "item")
     private Set<Booking> bookings = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "item")
+    private Set<Comment> comments = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

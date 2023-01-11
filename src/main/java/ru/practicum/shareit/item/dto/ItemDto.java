@@ -1,7 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingSlimDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.valid.ItemValidGroups;
 import ru.practicum.shareit.user.dto.UserSlimDto;
 
@@ -30,4 +34,5 @@ public class ItemDto {
     private BookingSlimDto lastBooking;
     private BookingSlimDto nextBooking;
     private Set<BookingSlimDto> bookings = new HashSet<>();
+    private Set<CommentDto> comments = new HashSet<>();
 }

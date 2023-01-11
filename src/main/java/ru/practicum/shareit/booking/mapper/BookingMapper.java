@@ -10,6 +10,5 @@ import ru.practicum.shareit.booking.model.Booking;
 public interface BookingMapper {
 
     BookingDto mapToDto(Booking booking);
-
     Booking mapToBooking(BookingRequestDto bookingRequestDto);
 }

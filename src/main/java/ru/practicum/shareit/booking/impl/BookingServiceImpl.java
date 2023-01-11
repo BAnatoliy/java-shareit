@@ -61,7 +61,36 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.WAITING);
 
         log.debug("Booking created");
-        return bookingRepository.save(booking);
+        Booking bookingResponse = bookingRepository.save(booking);
+/*
+
+        boolean isItemLastBooking_Null = item.getLastBooking() == null;
+        boolean isBooking_Before_Now = bookingResponse.getStart().isBefore(LocalDateTime.now());
+        boolean isItemLastBooking_After_Booking = false;
+        if(!isItemLastBooking_Null) {
+            isItemLastBooking_After_Booking = item.getLastBooking().getStart().isAfter(bookingResponse.getStart());
+        }
+
+        if ((isItemLastBooking_Null && isBooking_Before_Now) ||
+                (!isItemLastBooking_Null && isItemLastBooking_After_Booking && isBooking_Before_Now)) {
+            item.setLastBooking(bookingResponse);
+        }
+
+        boolean isItemNextBooking_Null = item.getNextBooking() == null;
+        boolean isItemNextBooking_After_Booking = false;
+        if (!isItemNextBooking_Null) {
+            isItemNextBooking_After_Booking = item.getNextBooking().getStart().isAfter(bookingResponse.getStart());
+        }
+
+        if ((isItemNextBooking_Null && !isBooking_Before_Now) ||
+                (!isItemNextBooking_Null && isItemNextBooking_After_Booking && !isBooking_Before_Now)) {
+            item.setLastBooking(bookingResponse);
+        }
+
+        itemRepository.save(item);
+*/
+
+        return bookingResponse;
     }
 
     @Override
