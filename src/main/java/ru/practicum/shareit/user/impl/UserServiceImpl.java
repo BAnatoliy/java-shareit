@@ -6,39 +6,55 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Transactional
     @Override
-    public User createUser(User user) {
+    public UserDto createUser(UserDto userDto) {
+        User user = userMapper.mapToUser(userDto);
         userRepository.save(user);
         log.debug("User created");
-        return user;
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong", userId)));
         log.debug("User with ID = {} is found", userId);
-        return user;
+        return userMapper.mapToUserDto(user);
+    }
+
+    @Override
+    public List<UserDto> getAllUsers() {
+        List<User> userList = userRepository.findAll();
+        log.debug("Get user`s list");
+        return userList.stream()
+                .map(userMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public User updateUser(User user, Long userId) {
+    public UserDto updateUser(UserDto userDto, Long userId) {
+        User user = userMapper.mapToUser(userDto);
         User oldUser = userRepository.findById(userId).orElseThrow(
                 () -> {
                     log.debug("User with ID = {} is found", userId);
@@ -62,7 +78,7 @@ public class UserServiceImpl implements UserService {
         }
         User savedUser = userRepository.save(oldUser);
         log.debug("User updated");
-        return savedUser;
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Transactional
@@ -70,12 +86,5 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
         log.debug("User with ID = {} deleted", userId);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        List<User> userList = userRepository.findAll();
-        log.debug("Get user`s list");
-        return userList;
     }
 }

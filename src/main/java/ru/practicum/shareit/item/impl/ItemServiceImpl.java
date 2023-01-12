@@ -10,6 +10,10 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.CommentRepository;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -27,18 +31,23 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemMapper itemMapper;
+
 
     public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
-                           BookingRepository bookingRepository, CommentRepository commentRepository) {
+                           BookingRepository bookingRepository, CommentRepository commentRepository,
+                           ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemMapper = itemMapper;
     }
 
     @Transactional
     @Override
-    public Item createItem(Item item, Long userId) {
+    public ItemDto createItem(ItemDto itemDto, Long userId) {
+        Item item = itemMapper.mapToItem(itemDto);
         item.setOwner(userRepository.findById(userId).orElseThrow(
                 () -> {
                     log.debug("User with ID = {} is found", userId);
@@ -48,12 +57,13 @@ public class ItemServiceImpl implements ItemService {
         ));
         Item savedItem = itemRepository.save(item);
         log.debug("Item created");
-        return savedItem;
+        return itemMapper.mapToDto(savedItem);
     }
 
     @Transactional
     @Override
-    public Item updateItem(Item item, Long itemId, Long userId) {
+    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
+        Item item = itemMapper.mapToItem(itemDto);
         Item oldItem = itemRepository.findById(itemId).orElseThrow(
                 () -> {
                     log.debug("Item with ID = {} is found", itemId);
@@ -84,11 +94,11 @@ public class ItemServiceImpl implements ItemService {
         }
         Item saveItem = itemRepository.save(oldItem);
         log.debug("Item updated");
-        return saveItem;
+        return itemMapper.mapToDto(saveItem);
     }
 
     @Override
-    public Item getItemById(Long itemId, Long userId) {
+    public ItemDto getItemById(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> {
             log.debug("Item with ID = {} is found", itemId);
             return new EntityNotFoundException(String.format("Item with ID = %s not found. ID is wrong",
@@ -101,11 +111,11 @@ public class ItemServiceImpl implements ItemService {
             getItemList(bookings, item, comments);
         }
         log.debug("Item with ID = {} is found", itemId);
-        return item;
+        return itemMapper.mapToDto(item);
     }
 
     @Override
-    public List<Item> getItemsByTheOwner(Long userId) {
+    public List<ItemDto> getItemsByTheOwner(Long userId) {
         if (userRepository.findById(userId).isEmpty()) {
             throw new EntityNotFoundException("User not found");
         }
@@ -119,17 +129,46 @@ public class ItemServiceImpl implements ItemService {
             getItemList(bookings, item, comments);
         }
         log.debug("Get item`s list with owner`s ID = {}", userId);
-        return itemList;
+        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> getAvailableItem(String text) {
+    public List<ItemDto> getAvailableItem(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
         List<Item> itemList = itemRepository.findAvailableItemByNameAndDescription(text);
         log.debug("Get item`s list contain {}", text);
-        return itemList;
+        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto createComment(CommentRequestDto commentRequestDto, Long itemId, Long userId) {
+        Comment comment = itemMapper.mapToComment(commentRequestDto);
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
+            log.debug("Item with ID = {} is found", itemId);
+            return new EntityNotFoundException(String.format("Item with ID = %s not found. ID is wrong",
+                    itemId));
+        });
+        User author = userRepository.findById(userId).orElseThrow(() -> {
+            log.debug("Item with ID = {} is found", itemId);
+            return new EntityNotFoundException(String.format("Item with ID = %s not found. ID is wrong",
+                    itemId));
+        });
+
+        long count = item.getBookings().stream().filter(booking -> booking.getBooker().getId().equals(userId) &&
+                booking.getEnd().isBefore(LocalDateTime.now())).count();
+        if (count < 1) {
+            throw new ItemCheckException("User has not book this item yet");
+        }
+
+        comment.setItem(item);
+        comment.setAuthor(author);
+        comment.setCreated(LocalDateTime.now());
+
+        Comment savedComment = commentRepository.save(comment);
+        log.debug("Comment for Item with ID {} saved", itemId);
+        return itemMapper.mapToCommentDto(savedComment);
     }
 
     private void getItemList(List<Booking> bookings, Item item, List<Comment> comments) {
@@ -171,33 +210,5 @@ public class ItemServiceImpl implements ItemService {
         item.setComments(itemComments);
         item.setLastBooking(lastBooking);
         item.setNextBooking(nextBooking);
-    }
-
-    @Override
-    public Comment createComment(Comment comment, Long itemId, Long userId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
-            log.debug("Item with ID = {} is found", itemId);
-            return new EntityNotFoundException(String.format("Item with ID = %s not found. ID is wrong",
-                    itemId));
-        });
-        User author = userRepository.findById(userId).orElseThrow(() -> {
-            log.debug("Item with ID = {} is found", itemId);
-            return new EntityNotFoundException(String.format("Item with ID = %s not found. ID is wrong",
-                    itemId));
-        });
-
-        long count = item.getBookings().stream().filter(booking -> booking.getBooker().getId().equals(userId) &&
-                booking.getEnd().isBefore(LocalDateTime.now())).count();
-        if (count < 1) {
-            throw new ItemCheckException("User has not book this item yet");
-        }
-
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(LocalDateTime.now());
-
-        Comment savedComment = commentRepository.save(comment);
-        log.debug("Comment for Item with ID {} saved", itemId);
-        return savedComment;
     }
 }
