@@ -1,19 +1,22 @@
 package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.practicum.shareit.booking.dto.BookingSlimDto;
+import ru.practicum.shareit.item.dto.ItemSlimDto;
 import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import javax.validation.constraints.*;
+import java.util.HashSet;
+import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    @Min(1)
-    @EqualsAndHashCode.Exclude
     private Long id;
     @NotEmpty(groups = UserValidGroups.OnCreate.class)
     @Email(groups = {UserValidGroups.OnCreate.class, UserValidGroups.OnUpdate.class})
@@ -22,4 +25,6 @@ public class UserDto {
     @NotBlank(groups = UserValidGroups.OnCreate.class)
     @NotNull(groups = UserValidGroups.OnCreate.class)
     private String name;
+    private Set<ItemSlimDto> items = new HashSet<>();
+    private Set<BookingSlimDto> bookings = new HashSet<>();
 }

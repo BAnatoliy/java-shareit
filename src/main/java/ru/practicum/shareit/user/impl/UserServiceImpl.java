@@ -2,38 +2,89 @@ package ru.practicum.shareit.user.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    public User createUser(User user) {
-        return userRepository.createUser(user);
+    @Transactional
+    @Override
+    public UserDto createUser(UserDto userDto) {
+        User user = userMapper.mapToUser(userDto);
+        userRepository.save(user);
+        log.debug("User created");
+        return userMapper.mapToUserDto(user);
     }
 
-    public User getUserById(Long userId) {
-        return userRepository.getUserById(userId);
+    @Override
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong", userId)));
+        log.debug("User with ID = {} is found", userId);
+        return userMapper.mapToUserDto(user);
     }
 
-    public User updateUser(Long userId, User user) {
-        return userRepository.updateUser(userId, user);
+    @Override
+    public List<UserDto> getAllUsers() {
+        List<User> userList = userRepository.findAll();
+        log.debug("Get user`s list");
+        return userList.stream()
+                .map(userMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public UserDto updateUser(UserDto userDto, Long userId) {
+        User user = userMapper.mapToUser(userDto);
+        User oldUser = userRepository.findById(userId).orElseThrow(
+                () -> {
+                    log.debug("User with ID = {} is found", userId);
+                    return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
+                            userId));
+                });
+        String userEmail = user.getEmail();
+        String userName = user.getName();
+
+        if (userEmail != null) {
+            if (userEmail.isBlank()) {
+                throw new ValidationException("Email cannot be empty");
+            }
+            oldUser.setEmail(user.getEmail());
+        }
+        if (userName != null) {
+            if (userName.isBlank()) {
+                throw new ValidationException("Name cannot be empty");
+            }
+            oldUser.setName(user.getName());
+        }
+        User savedUser = userRepository.save(oldUser);
+        log.debug("User updated");
+        return userMapper.mapToUserDto(savedUser);
+    }
+
+    @Transactional
+    @Override
     public void deleteUser(Long userId) {
-        userRepository.deleteUser(userId);
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.getAllUsers();
+        userRepository.deleteById(userId);
+        log.debug("User with ID = {} deleted", userId);
     }
 }

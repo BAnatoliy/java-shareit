@@ -1,19 +1,24 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ru.practicum.shareit.booking.dto.BookingSlimDto;
 import ru.practicum.shareit.item.valid.ItemValidGroups;
+import ru.practicum.shareit.user.dto.UserSlimDto;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashSet;
+import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
-    @Min(1)
-    @EqualsAndHashCode.Exclude
     private Long id;
     @NotBlank(groups = ItemValidGroups.OnCreate.class)
     @NotNull(groups = ItemValidGroups.OnCreate.class)
@@ -24,4 +29,9 @@ public class ItemDto {
     private String description;
     @NotNull(groups = ItemValidGroups.OnCreate.class)
     private Boolean available;
+    private UserSlimDto owner;
+    private BookingSlimDto lastBooking;
+    private BookingSlimDto nextBooking;
+    private Set<BookingSlimDto> bookings = new HashSet<>();
+    private Set<CommentDto> comments = new HashSet<>();
 }
