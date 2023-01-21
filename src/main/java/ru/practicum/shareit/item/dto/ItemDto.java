@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingSlimDto;
 import ru.practicum.shareit.item.valid.ItemValidGroups;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dto.UserSlimDto;
 
 import javax.validation.constraints.NotBlank;
@@ -30,6 +31,8 @@ public class ItemDto {
     @NotNull(groups = ItemValidGroups.OnCreate.class)
     private Boolean available;
     private UserSlimDto owner;
+    //private ItemRequest request;
+    private Long requestId;
     private BookingSlimDto lastBooking;
     private BookingSlimDto nextBooking;
     private Set<BookingSlimDto> bookings = new HashSet<>();

@@ -1,7 +1,9 @@
 package ru.practicum.shareit.booking.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.constant.BookingStatus;
@@ -31,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final String logForParameters = "Get list of bookings parameters: state = {}, size = {}, from = {}";
 
 
     public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository,
@@ -119,7 +122,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingByBooker(State state, Long userId) {
+    public List<BookingDto> getBookingByBooker(State state, Integer from, Integer size, Long userId) {
+        checkParametersFromAndSize(from, size);
         userRepository.findById(userId).orElseThrow(() -> {
             log.debug("User with ID = {} is found", userId);
             return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
@@ -127,56 +131,79 @@ public class BookingServiceImpl implements BookingService {
         });
 
         LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookings;
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByBooker_IdOrderByStartDesc(userId).stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
+                } else {
+                    bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId,
+                            CustomPageRequest.of(size, from));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case PAST:
-                return bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, now).stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, now);
+                } else {
+                    bookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId,
+                            now, CustomPageRequest.of(size, from));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case FUTURE:
-                return bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now).stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now);
+
+                } else {
+                    bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId,
+                            now, CustomPageRequest.of(size, from));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case CURRENT:
-                return bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(userId, now, now)
-                        .stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(userId,
+                            now, now);
+                } else {
+                    bookings = bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
+                                    userId, now, now, CustomPageRequest.of(size, from));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case WAITING:
-                return bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId, BookingStatus.WAITING)
-                        .stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                return getBookingDtosByStatus(BookingStatus.WAITING, state, from, size, userId);
             case REJECTED:
-                return bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId, BookingStatus.REJECTED)
-                        .stream().map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                return getBookingDtosByStatus(BookingStatus.REJECTED, state, from, size, userId);
             default:
                 return null;
         }
     }
 
+
     @Override
-    public List<BookingDto> getBookingByOwner(State state, Long userId) {
+    public List<BookingDto> getBookingByOwner(State state, Integer from, Integer size, Long userId) {
+        checkParametersFromAndSize(from, size);
         userRepository.findById(userId).orElseThrow(() -> {
             log.debug("User with ID = {} is found", userId);
             return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
                     userId));
         });
 
-        List<Booking> bookingList =
-                bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
+        List<Booking> bookingList;
+        if (from == null || size == null) {
+            bookingList = bookingRepository
+                    .findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
+        } else {
+            bookingList = bookingRepository
+                    .findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId,
+                            true, CustomPageRequest.of(size, from));
+        }
 
         LocalDateTime now = LocalDateTime.now();
-
         switch (state) {
             case ALL:
-                return bookingList.stream()
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                return getBookingDtos(bookingList);
             case PAST:
                 return bookingList.stream()
                         .filter(booking -> booking.getEnd().isBefore(now))
@@ -210,5 +237,31 @@ public class BookingServiceImpl implements BookingService {
             default:
                 return null;
         }
+    }
+
+    private void checkParametersFromAndSize(Integer from, Integer size) {
+        if ((from != null && from < 0) || (size != null && size <= 0)) {
+            log.debug("Parameters cannot be negative");
+            throw new ItemCheckException("Parameters cannot be negative");
+        }
+    }
+
+    private List<BookingDto> getBookingDtos(List<Booking> bookings) {
+        return bookings.stream()
+                .map(bookingMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    private List<BookingDto> getBookingDtosByStatus(BookingStatus status, State state, Integer from, Integer size, Long userId) {
+        List<Booking> bookings;
+        if (from == null || size == null) {
+            bookings = bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId,
+                    status);
+        } else {
+            bookings = bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId,
+                    status, CustomPageRequest.of(size, from));
+        }
+        log.debug(logForParameters, state, size, from);
+        return getBookingDtos(bookings);
     }
 }

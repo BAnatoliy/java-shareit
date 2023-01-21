@@ -15,8 +15,10 @@ import ru.practicum.shareit.user.model.User;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ItemMapper {
+    @Mapping(target = "requestId", source = "request.id")
     ItemDto mapToDto(Item item);
 
+    //@Mapping(target = "request.id", source = "requestId")
     Item mapToItem(ItemDto itemDto);
 
     @Mapping(target = "bookerId", source = "booker", qualifiedByName = "idFromBooker")
