@@ -13,7 +13,7 @@ public interface ItemRequestMapper {
     ItemRequest mapToItemRequest(ItemRequestDto itemRequestDto);
 
     @Mapping(target = "requestId", source = "request", qualifiedByName = "idFromRequest")
-    ItemSlimDtoForRequest mapToItemDtoForRequest (Item item);
+    ItemSlimDtoForRequest mapToItemDtoForRequest(Item item);
 
     @Named("idFromRequest")
     default Long idFromRequest(ItemRequest itemRequest) {

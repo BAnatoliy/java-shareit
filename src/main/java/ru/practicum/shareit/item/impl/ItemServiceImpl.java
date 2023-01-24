@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -120,15 +121,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsByTheOwner(Long userId) {
+    public List<ItemDto> getItemsByTheOwner(Long userId, Integer from, Integer size) {
         if (userRepository.findById(userId).isEmpty()) {
             throw new EntityNotFoundException("User not found");
         }
 
-        List<Item> itemList = itemRepository.findByOwnerIdOrderById(userId);
+        checkParametersFromAndSize(from, size);
+        List<Item> itemList;
+        if (from == null || size == null) {
+            itemList = itemRepository.findByOwnerIdOrderById(userId);
+        } else {
+            itemList = itemRepository.findByOwnerIdOrderById(userId, CustomPageRequest.of(from, size));
+        }
+        log.debug("Get item list with parameters from = {}, size = {}", from, size);
+
         List<Booking> bookings =
                 bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
-        List<Comment> comments = commentRepository.findAllByItem_IdIn(itemList.stream().map(Item::getId).collect(Collectors.toList()));
+        log.debug("Get bookings list for user with ID = {}", userId);
+
+        List<Comment> comments = commentRepository.findAllByItem_IdIn(itemList.stream()
+                .map(Item::getId).collect(Collectors.toList()));
+        log.debug("Get comments list for items");
 
         for (Item item : itemList) {
             getItemList(bookings, item, comments);
@@ -138,11 +151,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAvailableItem(String text) {
+    public List<ItemDto> getAvailableItem(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        List<Item> itemList = itemRepository.findAvailableItemByNameAndDescription(text);
+        checkParametersFromAndSize(from, size);
+
+        List<Item> itemList;
+        if (from == null || size == null) {
+            itemList = itemRepository.findAvailableItemByNameAndDescription(text);
+        } else {
+            itemList = itemRepository.findAvailableItemByNameAndDescription(text, from, size);
+        }
         log.debug("Get item`s list contain {}", text);
         return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
     }
@@ -215,5 +235,12 @@ public class ItemServiceImpl implements ItemService {
         item.setComments(itemComments);
         item.setLastBooking(lastBooking);
         item.setNextBooking(nextBooking);
+    }
+
+    private void checkParametersFromAndSize(Integer from, Integer size) {
+        if ((from != null && from < 0) || (size != null && size <= 0)) {
+            log.debug("Parameters cannot be negative");
+            throw new ItemCheckException("Parameters cannot be negative");
+        }
     }
 }

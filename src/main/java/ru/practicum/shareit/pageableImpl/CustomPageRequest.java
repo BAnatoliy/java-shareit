@@ -8,23 +8,23 @@ public class CustomPageRequest implements Pageable {
     private final int offset;
     private final int size;
 
-    public CustomPageRequest(Sort sort, int offset, int size) {
+    public CustomPageRequest(int offset, int size, Sort sort) {
         this.sort = sort;
         this.offset = offset;
         this.size = size;
     }
 
-    public static CustomPageRequest of( int size, int offset) {
+    public static CustomPageRequest of(int offset, int size) {
         return of(offset, size, Sort.unsorted());
     }
 
-    public static CustomPageRequest of(int size, int offset, Sort sort) {
-        return new CustomPageRequest(sort, offset, size);
+    public static CustomPageRequest of(int offset, int size, Sort sort) {
+        return new CustomPageRequest(offset, size, sort);
     }
 
     @Override
     public int getPageNumber() {
-        return offset /size;
+        return offset / size;
     }
 
     @Override

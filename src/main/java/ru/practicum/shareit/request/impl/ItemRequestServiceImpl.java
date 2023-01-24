@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ItemCheckException;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.ItemRequestService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -27,14 +26,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final ItemRequestMapper itemRequestMapper;
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
 
-    public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository, ItemRequestMapper itemRequestMapper,
-                                  UserRepository userRepository, ItemRepository itemRepository) {
+    public ItemRequestServiceImpl(ItemRequestRepository itemRequestRepository,
+                                  ItemRequestMapper itemRequestMapper, UserRepository userRepository) {
         this.itemRequestRepository = itemRequestRepository;
         this.itemRequestMapper = itemRequestMapper;
         this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
     }
 
     @Transactional
@@ -75,7 +72,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         findUserById(userId);
         Sort sortByCreateDate = Sort.by(Sort.Direction.DESC, "created");
-        Page<ItemRequest> itemRequests = itemRequestRepository.findAll(CustomPageRequest.of(size, from, sortByCreateDate));
+        Page<ItemRequest> itemRequests = itemRequestRepository.findAll(CustomPageRequest.of(from, size,
+                sortByCreateDate));
         itemRequestList = itemRequests.getContent().stream()
                 .filter(itemRequest -> !itemRequest.getUser().getId().equals(userId))
                 .map(itemRequestMapper::mapToDto)

@@ -25,6 +25,7 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
             Long userId, LocalDateTime dateTime, LocalDateTime dateTime2, Pageable pageable);
 
     List<Booking> findAllByBooker_IdAndStartAfterOrderByStartDesc(Long userId, LocalDateTime dateTime);
+
     List<Booking> findAllByBooker_IdAndStartAfterOrderByStartDesc(Long userId,
                                                                   LocalDateTime dateTime, Pageable pageable);
 
