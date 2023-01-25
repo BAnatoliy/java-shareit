@@ -144,7 +144,6 @@ class BookingRepositoryTest {
         assertTrue(bookingList.get(0).getStart().isAfter(bookingList.get(1).getStart()));
         assertTrue(bookingList.get(1).getStart().isAfter(bookingList.get(2).getStart()));
 
-
         List<Booking> bookingList2 = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(
                 1L, true, CustomPageRequest.of(1, 2));
         assertEquals(2, bookingList2.size());
@@ -162,5 +161,85 @@ class BookingRepositoryTest {
         assertEquals(2, bookingList.size());
         assertEquals(1L, bookingList.get(0).getItem().getId());
         assertEquals(1L, bookingList.get(1).getItem().getId());
+    }
+
+    @Test
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    public void findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDescTest() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookingList = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(1L, true, now);
+        assertEquals(2, bookingList.size());
+        assertEquals(1L, bookingList.get(0).getItem().getOwner().getId());
+        assertEquals(1L, bookingList.get(1).getItem().getOwner().getId());
+        assertTrue(bookingList.get(0).getEnd().isBefore(now));
+        assertTrue(bookingList.get(1).getEnd().isBefore(now));
+        assertTrue(bookingList.get(0).getStart().isAfter(bookingList.get(1).getStart()));
+
+        List<Booking> bookingList2 = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
+                        1L, true, now, CustomPageRequest.of(1, 2));
+        assertEquals(1, bookingList2.size());
+        assertEquals(1L, bookingList2.get(0).getItem().getOwner().getId());
+        assertTrue(bookingList2.get(0).getEnd().isBefore(now));
+    }
+
+    @Test
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    public void findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDescTest() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookingList = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(2L, true, now);
+        assertEquals(2, bookingList.size());
+        assertEquals(2L, bookingList.get(0).getItem().getOwner().getId());
+        assertEquals(2L, bookingList.get(1).getItem().getOwner().getId());
+        assertTrue(bookingList.get(0).getStart().isAfter(now));
+        assertTrue(bookingList.get(1).getStart().isAfter(now));
+        assertTrue(bookingList.get(0).getStart().isAfter(bookingList.get(1).getStart()));
+
+        List<Booking> bookingList2 = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
+                        2L, true, now, CustomPageRequest.of(1, 2));
+        assertEquals(1, bookingList2.size());
+        assertEquals(2L, bookingList2.get(0).getItem().getOwner().getId());
+        assertTrue(bookingList2.get(0).getStart().isAfter(now));
+    }
+
+    @Test
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    public void findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDescTest() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookingList = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+                        4L, true, now, now);
+        assertEquals(1, bookingList.size());
+        assertEquals(4L, bookingList.get(0).getItem().getOwner().getId());
+        assertTrue(bookingList.get(0).getStart().isBefore(now));
+        assertTrue(bookingList.get(0).getEnd().isAfter(now));
+
+        List<Booking> bookingList2 = bookingRepository
+                .findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+                        4L, true, now, now, CustomPageRequest.of(0, 3));
+        assertEquals(1, bookingList2.size());
+        assertEquals(4L, bookingList2.get(0).getItem().getOwner().getId());
+        assertTrue(bookingList2.get(0).getStart().isBefore(now));
+        assertTrue(bookingList2.get(0).getEnd().isAfter(now));
+    }
+
+    @Test
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    public void findAllByItem_Owner_IdAndStatusIsOrderByStartDescTest() {
+        List<Booking> bookingList = bookingRepository
+                .findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(2L, BookingStatus.WAITING);
+        assertEquals(1, bookingList.size());
+        assertEquals(2L, bookingList.get(0).getItem().getOwner().getId());
+        assertEquals(BookingStatus.WAITING, bookingList.get(0).getStatus());
+
+        List<Booking> bookingList2 = bookingRepository
+                .findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(2L, BookingStatus.REJECTED,
+                        CustomPageRequest.of(0, 3));
+        assertEquals(1, bookingList2.size());
+        assertEquals(2L, bookingList2.get(0).getItem().getOwner().getId());
+        assertEquals(BookingStatus.REJECTED, bookingList2.get(0).getStatus());
     }
 }

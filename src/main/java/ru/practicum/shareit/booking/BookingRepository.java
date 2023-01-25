@@ -40,4 +40,27 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
                                                                           Boolean available, Pageable pageable);
 
     List<Booking> findAllByItem_Id(Long itemId);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime, Pageable pageable);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime, Pageable pageable);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime, LocalDateTime dateTime2);
+
+    List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+            Long userId, Boolean available, LocalDateTime dateTime, LocalDateTime dateTime2, Pageable pageable);
+
+    List<Booking> findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(Long userId, BookingStatus bookingStatus);
+
+    List<Booking> findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(Long userId,
+                                                                    BookingStatus bookingStatus, Pageable pageable);
 }

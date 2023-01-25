@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,7 +152,6 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now);
-
                 } else {
                     bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId,
                             now, CustomPageRequest.of(from, size));
@@ -179,60 +177,63 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-
     @Override
     public List<BookingDto> getBookingByOwner(State state, Integer from, Integer size, Long userId) {
         checkParametersFromAndSize(from, size);
         userRepository.findById(userId).orElseThrow(() -> {
             log.debug("User with ID = {} is found", userId);
-            return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
-                    userId));
+            return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong", userId));
         });
 
-        List<Booking> bookingList;
-        if (from == null || size == null) {
-            bookingList = bookingRepository
-                    .findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
-        } else {
-            bookingList = bookingRepository
-                    .findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId,
-                            true, CustomPageRequest.of(from, size));
-        }
-
+        List<Booking> bookings;
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case ALL:
-                return getBookingDtos(bookingList);
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(
+                            userId, true);
+                } else {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(
+                            userId, true, CustomPageRequest.of(from, size));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case PAST:
-                return bookingList.stream()
-                        .filter(booking -> booking.getEnd().isBefore(now))
-                        .sorted(Comparator.comparing(Booking::getStart).reversed())
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
+                            userId, true, now);
+                } else {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
+                            userId, true, now, CustomPageRequest.of(from, size));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case FUTURE:
-                return bookingList.stream()
-                        .filter(booking -> booking.getStart().isAfter(now))
-                        .sorted(Comparator.comparing(Booking::getStart).reversed())
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
+                            userId, true, now);
+                } else {
+                    bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
+                            userId, true, now, CustomPageRequest.of(from, size));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case CURRENT:
-                return bookingList.stream()
-                        .filter(booking -> booking.getEnd().isAfter(now) && booking.getStart().isBefore(now))
-                        .sorted(Comparator.comparing(Booking::getStart).reversed())
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                if (from == null || size == null) {
+                    bookings = bookingRepository
+                            .findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+                            userId, true, now, now);
+                } else {
+                    bookings = bookingRepository
+                            .findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
+                            userId, true, now, now, CustomPageRequest.of(from, size));
+                }
+                log.debug(logForParameters, state, size, from);
+                return getBookingDtos(bookings);
             case WAITING:
-                return bookingList.stream()
-                        .filter(booking -> booking.getStatus().equals(BookingStatus.WAITING))
-                        .sorted(Comparator.comparing(Booking::getStart).reversed())
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                return getBookingDtosByOwnerAndByStatus(BookingStatus.WAITING, state, from, size, userId);
             case REJECTED:
-                return bookingList.stream()
-                        .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED))
-                        .sorted(Comparator.comparing(Booking::getStart).reversed())
-                        .map(bookingMapper::mapToDto)
-                        .collect(Collectors.toList());
+                return getBookingDtosByOwnerAndByStatus(BookingStatus.REJECTED, state, from, size, userId);
             default:
                 return null;
         }
@@ -259,6 +260,20 @@ public class BookingServiceImpl implements BookingService {
                     status);
         } else {
             bookings = bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(userId,
+                    status, CustomPageRequest.of(from, size));
+        }
+        log.debug(logForParameters, state, size, from);
+        return getBookingDtos(bookings);
+    }
+
+    private List<BookingDto> getBookingDtosByOwnerAndByStatus(BookingStatus status, State state, Integer from,
+                                                    Integer size, Long userId) {
+        List<Booking> bookings;
+        if (from == null || size == null) {
+            bookings = bookingRepository.findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(userId,
+                    status);
+        } else {
+            bookings = bookingRepository.findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(userId,
                     status, CustomPageRequest.of(from, size));
         }
         log.debug(logForParameters, state, size, from);

@@ -1,33 +1,31 @@
-/*
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ErrorHandler;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.TestControllersUtils.readRequest;
 
-@Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class UserControllerTest {
+class UserControllerIntegrationTest {
     private final UserController userController;
     private final ErrorHandler errorHandler;
     private final UserRepository userRepository;
@@ -42,52 +40,40 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser() throws Exception {
+    @SneakyThrows
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    void create_User_When_Email_Not_Busy_Should_User_Will_Created() {
+        MockHttpServletRequestBuilder request = post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(readRequest("json", "user_Jack.json"));
+
+        mockMvc.perform(request)
+                .andExpect(jsonPath("$.id", is(6L), Long.class))
+                .andExpect(jsonPath("$.name", is("jack")))
+                .andExpect(jsonPath("$.email", is("jack@ya.ru")));
+
+        Optional<User> user6 = userRepository.findById(6L);
+        assertThat(user6).isPresent().hasValueSatisfying(user -> assertThat(user)
+                .hasFieldOrPropertyWithValue("id", 6L)
+                .hasFieldOrPropertyWithValue("name", "jack")
+                .hasFieldOrPropertyWithValue("email", "jack@ya.ru"));
+    }
+
+    @Test
+    @SneakyThrows
+    @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
+    void create_User_When_Email_Busy_Should_User_Will_Not_Created() {
+        Optional<User> user1 = userRepository.findById(1L);
+        assertThat(user1).isPresent().hasValueSatisfying(user -> assertThat(user)
+                .hasFieldOrPropertyWithValue("id", 1L)
+                .hasFieldOrPropertyWithValue("name", "user1")
+                .hasFieldOrPropertyWithValue("email", "user1@ya.ru"));
 
         MockHttpServletRequestBuilder request = post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(readRequest("user/json", "user1.json"));
+                .content(readRequest("json", "user_User1.json"));
 
         mockMvc.perform(request)
-                .andExpect(jsonPath("$.id", is(1L), Long.class))
-                .andExpect(jsonPath("$.name", is("user")))
-                .andExpect(jsonPath("$.email", is("user@user.com")));
-
-        User user = userRepository.findById(1L).orElseThrow(RuntimeException::new);
-        assertEquals("user", user.getName());
-        assertEquals("user@user.com", user.getEmail());
+                .andExpect(status().is(500));
     }
-
-    @Test
-    void createUser2() throws Exception {
-
-        MockHttpServletRequestBuilder request = post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(readRequest("user/json", "user1.json"));
-
-        mockMvc.perform(request)
-                .andExpect(jsonPath("$.id", is(1L), Long.class))
-                .andExpect(jsonPath("$.name", is("user")))
-                .andExpect(jsonPath("$.email", is("user@user.com")));
-
-        User user = userRepository.findById(1L).orElseThrow(RuntimeException::new);
-        assertEquals("user", user.getName());
-        assertEquals("user@user.com", user.getEmail());
-    }
-
-    @Test
-    void getUserById() {
-    }
-
-    @Test
-    void getAllUsers() {
-    }
-
-    @Test
-    void updateUser() {
-    }
-
-    @Test
-    void deleteUser() {
-    }
-}*/
+}

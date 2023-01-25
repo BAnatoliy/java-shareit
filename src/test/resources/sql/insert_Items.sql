@@ -47,5 +47,7 @@ values ('request`s description 4', current_timestamp - interval '7' hour, 5);
 insert into requests (description, created, user_id)
 values ('request`s description 5', current_timestamp - interval '10' minute, 5);
 
-insert into items (name, description, available, user_id, request_id) values ('item11', 'item description11', true, 5, 1);
-insert into items (name, description, available, user_id, request_id) values ('item12', 'item description12', true, 5, 2);
+insert into items (name, description, available, user_id, request_id)
+values ('item11', 'item description11', true, 5, 1);
+insert into items (name, description, available, user_id, request_id)
+values ('item12', 'item description12', true, 5, 2);
