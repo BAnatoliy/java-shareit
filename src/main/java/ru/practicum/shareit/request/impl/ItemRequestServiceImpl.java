@@ -57,10 +57,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getAllRequests(Long userId, Integer from, Integer size) {
+        findUserById(userId);
         List<ItemRequestDto> itemRequestList;
         if (from == null || size == null) {
             log.debug("Parameters are null");
-            itemRequestList = itemRequestRepository.findAllByOrderByCreatedDesc()
+            itemRequestList = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(userId)
                     .stream().map(itemRequestMapper::mapToDto).collect(Collectors.toList());
             log.debug("Get all list of request");
             return itemRequestList;
@@ -70,12 +71,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new ItemCheckException("Parameters cannot be negative");
         }
 
-        findUserById(userId);
-        Sort sortByCreateDate = Sort.by(Sort.Direction.DESC, "created");
-        Page<ItemRequest> itemRequests = itemRequestRepository.findAll(CustomPageRequest.of(from, size,
-                sortByCreateDate));
+        Page<ItemRequest> itemRequests = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(userId,
+                CustomPageRequest.of(from, size));
         itemRequestList = itemRequests.getContent().stream()
-                .filter(itemRequest -> !itemRequest.getUser().getId().equals(userId))
                 .map(itemRequestMapper::mapToDto)
                 .collect(Collectors.toList());
         log.debug("Get page of requests sorted by create date with {} elements from {}", size, from);

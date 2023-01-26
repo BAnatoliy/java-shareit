@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 
@@ -22,13 +24,19 @@ class ItemRequestRepositoryTest {
 
     @Test
     @Sql(value = {"classpath:sql/schemaH2.sql", "classpath:sql/insert_Items.sql"})
-    public void findAllByOrderByCreatedDescTest() {
-        List<ItemRequest> listItemRequests = itemRequestRepository.findAllByOrderByCreatedDesc();
+    public void findAllByUserIdNotOrderByCreatedDesc() {
+        List<ItemRequest> listItemRequests = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(1L);
         assertEquals(5, listItemRequests.size());
         assertTrue(listItemRequests.get(0).getCreated().isAfter(listItemRequests.get(1).getCreated()));
         assertTrue(listItemRequests.get(1).getCreated().isAfter(listItemRequests.get(2).getCreated()));
         assertTrue(listItemRequests.get(2).getCreated().isAfter(listItemRequests.get(3).getCreated()));
         assertTrue(listItemRequests.get(3).getCreated().isAfter(listItemRequests.get(4).getCreated()));
+
+        Page<ItemRequest> listItemRequests2 = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(
+                1L, CustomPageRequest.of(2, 3));
+        assertEquals(3, listItemRequests2.getContent().size());
+        assertTrue(listItemRequests2.getContent().get(0).getCreated().isAfter(listItemRequests2.getContent().get(1).getCreated()));
+        assertTrue(listItemRequests2.getContent().get(1).getCreated().isAfter(listItemRequests2.getContent().get(2).getCreated()));
     }
 
     @Test
