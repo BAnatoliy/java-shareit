@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CommentRequestDtoTest {
     private CommentRequestDto commentRequestDto;
+
     @BeforeEach
     void setUp() {
         commentRequestDto = new CommentRequestDto();
