@@ -114,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             List<Booking> bookings = bookingRepository.findAllByItem_Id(itemId);
             List<Comment> comments = commentRepository.findAllByItem_Id(itemId);
-            getItemList(bookings, item, comments);
+            getBookingsAndComments(bookings, item, comments);
         }
         log.debug("Item with ID = {} is found", itemId);
         return itemMapper.mapToDto(item);
@@ -144,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Get comments list for items");
 
         for (Item item : itemList) {
-            getItemList(bookings, item, comments);
+            getBookingsAndComments(bookings, item, comments);
         }
         log.debug("Get item`s list with owner`s ID = {}", userId);
         return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
@@ -196,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.mapToCommentDto(savedComment);
     }
 
-    private void getItemList(List<Booking> bookings, Item item, List<Comment> comments) {
+    private void getBookingsAndComments(List<Booking> bookings, Item item, List<Comment> comments) {
         List<Booking> itemBookings = bookings.stream()
                 .filter(booking -> booking.getItem().equals(item))
                 .sorted(Comparator.comparing(Booking::getStart))
@@ -222,7 +222,7 @@ public class ItemServiceImpl implements ItemService {
                     nextBooking = booking;
                 }
                 if (item.getNextBooking() != null &&
-                        item.getNextBooking().getStart().isBefore(booking.getStart())) {
+                        item.getNextBooking().getStart().isAfter(booking.getStart())) {
                     nextBooking = booking;
                 }
             }

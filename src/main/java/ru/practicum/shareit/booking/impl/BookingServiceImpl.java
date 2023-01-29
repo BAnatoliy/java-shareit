@@ -65,7 +65,6 @@ public class BookingServiceImpl implements BookingService {
 
         if (item.getOwner().getId().equals(userId)) {
             throw new EntityNotFoundException("Owner cannot book him item");
-
         }
 
         booking.setItem(item);

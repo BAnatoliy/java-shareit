@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.impl;
+package ru.practicum.shareit.itemRequest;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ItemCheckException;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.impl.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.mapper.ItemRequestMapperImpl;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
@@ -38,7 +39,7 @@ class ItemRequestServiceImplTest {
     private ItemRequestServiceImpl itemRequestService;
 
     @Test
-    void create() {
+    void createTest() {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setId(1L);
         itemRequest.setCreated(LocalDateTime.now());
@@ -72,13 +73,13 @@ class ItemRequestServiceImplTest {
         verify(itemRequestRepository).save(itemRequest);
         verify(itemRequestMapper).mapToDto(itemRequestWithUser);
 
-        when(userRepository.findById(222L)).thenThrow(EntityNotFoundException.class);
+        when(userRepository.findById(222L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () ->
                 itemRequestService.create(itemRequestDto, 222L));
     }
 
     @Test
-    void getUsersRequests() {
+    void getUsersRequestsTest() {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setId(1L);
         itemRequest.setCreated(LocalDateTime.now());
@@ -119,7 +120,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenParametersIsNull_shouldGetListAllRequests() {
+    void getAllRequestsTest_whenParametersIsNull_shouldGetListAllRequests() {
         User user2 = new User();
         user2.setId(2L);
         user2.setName("UserName");
@@ -160,7 +161,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenParametersIsCorrect_shouldGetListAllRequests() {
+    void getAllRequestsTest_whenParametersIsCorrect_shouldGetListAllRequests() {
         User user2 = new User();
         user2.setId(2L);
         user2.setName("UserName");
@@ -201,7 +202,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenParametersIsNegative_shouldThrowException() {
+    void getAllRequestsTest_whenParametersIsNegative_shouldThrowException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
 
         assertThrows(ItemCheckException.class, () ->
@@ -217,7 +218,7 @@ class ItemRequestServiceImplTest {
 
 
     @Test
-    void getItemRequestById() {
+    void getItemRequestByIdTest() {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setId(1L);
         itemRequest.setCreated(LocalDateTime.now());
@@ -240,7 +241,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getItemRequestById_whenItemNotFound_shouldThrowException() {
+    void getItemRequestByIdTest_whenItemNotFound_shouldThrowException() {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setId(1L);
         itemRequest.setCreated(LocalDateTime.now());

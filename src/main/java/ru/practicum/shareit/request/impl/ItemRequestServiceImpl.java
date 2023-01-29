@@ -2,7 +2,6 @@ package ru.practicum.shareit.request.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ItemCheckException;
@@ -96,7 +95,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private User findUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> {
-                    log.debug("User with ID = {} is found", userId);
+                    log.debug("User with ID = {} is not found", userId);
                     return new EntityNotFoundException(String.format("User with ID = %s not found. ID is wrong",
                             userId));
                 }
