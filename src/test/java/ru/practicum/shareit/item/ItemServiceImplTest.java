@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.dto.BookingSlimDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ItemCheckException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -133,8 +134,10 @@ class ItemServiceImplTest {
         ItemDto newItemDto = new ItemDto();
         newItem.setName("newName");
         newItem.setDescription("newDescription");
+        newItem.setAvailable(false);
         newItemDto.setName("newName");
         newItemDto.setDescription("newDescription");
+        newItemDto.setAvailable(false);
         when(itemMapper.mapToItem(newItemDto)).thenReturn(newItem);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(itemRepository.save(item)).thenReturn(item);
@@ -146,6 +149,7 @@ class ItemServiceImplTest {
         Item savedItem = itemArgumentCaptor.getValue();
         assertEquals("newName", savedItem.getName());
         assertEquals("newDescription", savedItem.getDescription());
+        assertFalse(savedItem.getAvailable());
     }
 
     @Test
@@ -164,6 +168,36 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void updateItemTest_whenNameIsBlank_shouldThrowException() {
+        Item newItem = new Item();
+        ItemDto newItemDto = new ItemDto();
+        newItem.setName("  ");
+        newItem.setDescription("newDescription");
+        newItemDto.setName("  ");
+        newItemDto.setDescription("newDescription");
+        when(itemMapper.mapToItem(newItemDto)).thenReturn(newItem);
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> itemService.updateItem(newItemDto, 1L, 1L));
+        verify(itemRepository, never()).save(any());
+    }
+
+    @Test
+    void updateItemTest_whenDescriptionIsBlank_shouldThrowException() {
+        Item newItem = new Item();
+        ItemDto newItemDto = new ItemDto();
+        newItem.setName("newName");
+        newItem.setDescription("   ");
+        newItemDto.setName("newName");
+        newItemDto.setDescription("   ");
+        when(itemMapper.mapToItem(newItemDto)).thenReturn(newItem);
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> itemService.updateItem(newItemDto, 1L, 1L));
+        verify(itemRepository, never()).save(any());
+    }
+
+    @Test
     void updateItemTest_whenUserIsNotOwner_shouldThrowException() {
         Item newItem = new Item();
         ItemDto newItemDto = new ItemDto();
@@ -172,7 +206,7 @@ class ItemServiceImplTest {
         newItemDto.setName("newName");
         newItemDto.setDescription("newDescription");
         when(itemMapper.mapToItem(newItemDto)).thenReturn(newItem);
-        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         assertThrows(EntityNotFoundException.class, () ->
                 itemService.updateItem(newItemDto, 1L, 111L));

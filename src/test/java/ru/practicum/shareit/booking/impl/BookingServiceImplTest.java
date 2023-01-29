@@ -19,6 +19,7 @@ import ru.practicum.shareit.exception.ItemCheckException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemSlimDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserSlimDto;
 import ru.practicum.shareit.user.model.User;
@@ -216,7 +217,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingById() {
+    void getBookingByIdTest() {
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
         when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
         BookingDto bookingDtoReturn = bookingService.getBookingById(1L, 4L);
@@ -226,6 +227,22 @@ class BookingServiceImplTest {
         when(bookingMapper.mapToDto(booking4)).thenReturn(bookingDto4);
         BookingDto bookingDtoReturn2 = bookingService.getBookingById(4L, 2L);
         assertEquals(bookingDto4, bookingDtoReturn2);
+    }
+
+    @Test
+    void getBookingByIdTest_whenBookingNotFound_shouldThrowException() {
+        when(bookingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () ->
+                bookingService.getBookingById(1L, 2L));
+    }
+
+    @Test
+    void getBookingByIdTest_whenUserIsNotOwnerOrBooker_shouldThrowException() {
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+
+        assertThrows(EntityNotFoundException.class, () ->
+                bookingService.getBookingById(1L, 2L));
     }
 
     @Test
@@ -259,6 +276,19 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getBookingByBookerTest_whenStateIsAllFromIs0SizeIs2_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdOrderByStartDesc(anyLong(), any(CustomPageRequest.class)))
+                .thenReturn(List.of(booking, booking2));
+        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(State.ALL, 0, 2, 1L);
+        verify(bookingRepository).findAllByBooker_IdOrderByStartDesc(anyLong(), any(CustomPageRequest.class));
+        assertEquals(List.of(bookingDto, bookingDto2), bookingByBooker);
+    }
+
+    @Test
     void getBookingByBookerTest_whenStateIsPast_shouldGetListBooking() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(
@@ -270,6 +300,21 @@ class BookingServiceImplTest {
                 State.PAST, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class));
+        assertEquals(List.of(bookingDto), bookingByBooker);
+    }
+
+    @Test
+    void getBookingByBookerTest_whenStateIsPastFromIs0SizeIs1_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class)))
+                .thenReturn(List.of(booking));
+        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
+                State.PAST, 0, 1, 1L);
+        verify(bookingRepository).findAllByBooker_IdAndEndBeforeOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class));
         assertEquals(List.of(bookingDto), bookingByBooker);
     }
 
@@ -288,6 +333,20 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getBookingByBookerTest_whenStateIsFutureFromIs0SizeIs1_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class))).thenReturn(List.of(booking3));
+        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
+                State.FUTURE, 0, 1, 1L);
+        verify(bookingRepository).findAllByBooker_IdAndStartAfterOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class),  any(CustomPageRequest.class));
+        assertEquals(List.of(bookingDto3), bookingByBooker);
+    }
+
+    @Test
     void getBookingByBookerTest_whenStateIsCurrent_shouldGetListBooking() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
@@ -298,6 +357,21 @@ class BookingServiceImplTest {
                 State.CURRENT, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
+        assertEquals(List.of(bookingDto2), bookingByBooker);
+    }
+
+    @Test
+    void getBookingByBookerTest_whenStateIsCurrentFromIs0SizeIs1_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(CustomPageRequest.class)))
+                .thenReturn(List.of(booking2));
+        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
+                State.CURRENT, 0, 1, 1L);
+        verify(bookingRepository).findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
+                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(CustomPageRequest.class));
         assertEquals(List.of(bookingDto2), bookingByBooker);
     }
 
@@ -316,6 +390,20 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getBookingByBookerTest_whenFromIs0FromIs1StateIsWaiting_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(List.of(booking));
+        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
+                State.WAITING, 0, 1, 1L);
+        verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class));
+        assertEquals(List.of(bookingDto), bookingByBooker);
+    }
+
+    @Test
     void getBookingByBookerTest_whenStateIsRejected_shouldGetListBooking() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
@@ -326,6 +414,20 @@ class BookingServiceImplTest {
                 State.REJECTED, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 1L, BookingStatus.REJECTED);
+        assertEquals(List.of(bookingDto3), bookingByBooker);
+    }
+
+    @Test
+    void getBookingByBookerTest_whenFromIs0SizeIs1StateIsRejected_shouldGetListBooking() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(List.of(booking3));
+        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+
+        List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
+                State.REJECTED, 0, 1, 1L);
+        verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class));
         assertEquals(List.of(bookingDto3), bookingByBooker);
     }
 

@@ -169,10 +169,8 @@ public class BookingServiceImpl implements BookingService {
                 return getBookingDtos(bookings);
             case WAITING:
                 return getBookingDtosByStatus(BookingStatus.WAITING, state, from, size, userId);
-            case REJECTED:
-                return getBookingDtosByStatus(BookingStatus.REJECTED, state, from, size, userId);
             default:
-                return null;
+                return getBookingDtosByStatus(BookingStatus.REJECTED, state, from, size, userId);
         }
     }
 
@@ -231,10 +229,8 @@ public class BookingServiceImpl implements BookingService {
                 return getBookingDtos(bookings);
             case WAITING:
                 return getBookingDtosByOwnerAndByStatus(BookingStatus.WAITING, state, from, size, userId);
-            case REJECTED:
-                return getBookingDtosByOwnerAndByStatus(BookingStatus.REJECTED, state, from, size, userId);
             default:
-                return null;
+                return getBookingDtosByOwnerAndByStatus(BookingStatus.REJECTED, state, from, size, userId);
         }
     }
 
