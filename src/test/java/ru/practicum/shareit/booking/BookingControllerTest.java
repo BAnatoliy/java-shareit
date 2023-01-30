@@ -41,7 +41,6 @@ class BookingControllerTest {
     @Autowired
     private ErrorHandler errorHandler;
 
-
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders
