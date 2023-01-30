@@ -12,7 +12,7 @@ class CustomPageRequestTest {
         CustomPageRequest customPageRequest = CustomPageRequest.of(
                 10, 2);
         int pageNumber = customPageRequest.getPageNumber();
-        assertEquals(10/2, pageNumber);
+        assertEquals(10 / 2, pageNumber);
 
         Pageable next = customPageRequest.next();
         assertEquals(customPageRequest.getPageNumber() + 1, next.getOffset());
