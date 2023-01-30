@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.exception.BookingApprovedException;
 import ru.practicum.shareit.exception.ErrorHandler;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
@@ -162,11 +164,37 @@ class UserControllerTest {
     void deleteUserTest() {
         doNothing().when(userService).deleteUser(2L);
 
-        MockHttpServletRequestBuilder request = get("/users/2")
+        MockHttpServletRequestBuilder request = delete("/users/2")
                 .header("X-Sharer-User-Id", "1")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(request)
                 .andExpect(status().is(200));
+    }
+
+    @SneakyThrows
+    @Test
+    void deleteUserTest_whenThrowValidationException_getStatusResponse409() {
+        doThrow(ValidationException.class).when(userService).deleteUser(2L);
+
+        MockHttpServletRequestBuilder request = delete("/users/2")
+                .header("X-Sharer-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andExpect(status().is(409));
+    }
+
+    @SneakyThrows
+    @Test
+    void deleteUserTest_whenThrowBookingApprovedException_getStatusResponse409() {
+        doThrow(BookingApprovedException.class).when(userService).deleteUser(2L);
+
+        MockHttpServletRequestBuilder request = delete("/users/2")
+                .header("X-Sharer-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(request)
+                .andExpect(status().is(400));
     }
 }

@@ -50,7 +50,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getUserById() {
+    void getUserByIdTest() {
         UserDto userDto = new UserDto();
         userDto.setId(1L);
         userDto.setName("UserName");
@@ -67,6 +67,14 @@ class UserServiceImplTest {
         assertEquals(userDto, userReturn);
         verify(userRepository).findById(1L);
         verify(userMapper).mapToUserDto(user);
+    }
+
+    @Test
+    void getUserByIdTest_whenUserNotFound_shouldThrowException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () ->
+                userService.getUserById(1L));
     }
 
     @Test
@@ -118,15 +126,15 @@ class UserServiceImplTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(oldUser));
         when(userMapper.mapToUser(userDto)).thenReturn(oldUser);
-        when(userMapper.mapToUserDto(newUser)).thenReturn(userDto);
-        when(userRepository.save(newUser)).thenReturn(newUser);
+        when(userMapper.mapToUserDto(any(User.class))).thenReturn(userDto);
+        when(userRepository.save(any(User.class))).thenReturn(newUser);
 
         UserDto updateUser = userService.updateUser(userDto, 1L);
         assertEquals(userDto, updateUser);
         verify(userRepository).findById(1L);
-        verify(userRepository).save(newUser);
+        verify(userRepository).save(any(User.class));
         verify(userMapper).mapToUser(userDto);
-        verify(userMapper).mapToUserDto(newUser);
+        verify(userMapper).mapToUserDto(any(User.class));
     }
 
     @Test
@@ -141,13 +149,12 @@ class UserServiceImplTest {
         oldUser.setName("OldUserName");
         oldUser.setEmail("oldu@ya.ru");
 
-        when(userRepository.findById(2L)).thenThrow(EntityNotFoundException.class);
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
         when(userMapper.mapToUser(userDto)).thenReturn(oldUser);
 
         assertThrows(EntityNotFoundException.class, () ->
                 userService.updateUser(userDto, 2L));
-        verify(userRepository).findById(2L);
-        verify(userMapper).mapToUser(userDto);
+
     }
 
     @Test

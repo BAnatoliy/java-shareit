@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Setter
@@ -31,17 +30,4 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "booker")
     private Set<Booking> bookings = new HashSet<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

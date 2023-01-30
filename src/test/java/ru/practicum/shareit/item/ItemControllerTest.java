@@ -214,13 +214,12 @@ class ItemControllerTest {
         ItemDto item2 = new ItemDto(2L, "name2", "desc2", true, owner, 1L, booking,
                 booking2, new HashSet<>(), new HashSet<>());
         List<ItemDto> items = List.of(item, item2);
-        when(itemService.getAvailableItem(anyString(), anyInt(), anyInt())).thenReturn(items);
+        when(itemService.getItemsByTheOwner(anyLong(), anyInt(), anyInt())).thenReturn(items);
 
-        MockHttpServletRequestBuilder request = get("/items/search")
+        MockHttpServletRequestBuilder request = get("/items")
                 .header("X-Sharer-User-Id", "1")
                 .param("from", "0")
                 .param("size", "2")
-                .param("text", "des")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(request)
