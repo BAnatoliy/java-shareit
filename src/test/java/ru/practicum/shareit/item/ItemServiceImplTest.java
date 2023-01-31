@@ -306,8 +306,7 @@ class ItemServiceImplTest {
                 .thenReturn(bookingList);
         when(commentRepository.findAllByItem_IdIn(itemList.stream().map(Item::getId).collect(Collectors.toList())))
                 .thenReturn(commentList);
-        when(itemMapper.mapToDto(item)).thenReturn(itemDto);
-        when(itemMapper.mapToDto(item2)).thenReturn(itemDto2);
+        when(itemMapper.mapToListDto(itemList)).thenReturn(List.of(itemDto, itemDto2));
 
         List<ItemDto> itemsByTheOwner = itemService.getItemsByTheOwner(1L, null, null);
         assertEquals(2, itemsByTheOwner.size());
@@ -315,8 +314,7 @@ class ItemServiceImplTest {
         verify(itemRepository).findByOwnerIdOrderById(1L);
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(1L, true);
         verify(commentRepository).findAllByItem_IdIn(anyList());
-        verify(itemMapper).mapToDto(item);
-        verify(itemMapper).mapToDto(item2);
+        verify(itemMapper).mapToListDto(itemList);
     }
 
     @Test
@@ -330,7 +328,7 @@ class ItemServiceImplTest {
                 .thenReturn(bookingList);
         when(commentRepository.findAllByItem_IdIn(itemList.stream().map(Item::getId).collect(Collectors.toList())))
                 .thenReturn(commentList);
-        when(itemMapper.mapToDto(item)).thenReturn(itemDto);
+        when(itemMapper.mapToListDto(itemList)).thenReturn(List.of(itemDto));
 
         List<ItemDto> itemsByTheOwner = itemService.getItemsByTheOwner(1L, 0, 1);
         assertEquals(1, itemsByTheOwner.size());
@@ -338,7 +336,7 @@ class ItemServiceImplTest {
         verify(itemRepository).findByOwnerIdOrderById(anyLong(), any(CustomPageRequest.class));
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(1L, true);
         verify(commentRepository).findAllByItem_IdIn(anyList());
-        verify(itemMapper).mapToDto(item);
+        verify(itemMapper).mapToListDto(itemList);
     }
 
     @Test
@@ -354,8 +352,7 @@ class ItemServiceImplTest {
     void getAvailableItemTest_whenParametersAreNull_shouldGetListOfAllItems() {
         List<Item> itemList = List.of(item, item2);
         when(itemRepository.findAvailableItemByNameAndDescription("dEsC")).thenReturn(itemList);
-        when(itemMapper.mapToDto(item)).thenReturn(itemDto);
-        when(itemMapper.mapToDto(item2)).thenReturn(itemDto2);
+        when(itemMapper.mapToListDto(itemList)).thenReturn(List.of(itemDto, itemDto2));
 
         List<ItemDto> itemDtoList = itemService.getAvailableItem("dEsC", null, null);
         assertEquals(2, itemDtoList.size());
@@ -367,7 +364,7 @@ class ItemServiceImplTest {
         List<Item> itemList = List.of(item);
         when(itemRepository.findAvailableItemByNameAndDescription("dEsC", 0, 1))
                 .thenReturn(itemList);
-        when(itemMapper.mapToDto(item)).thenReturn(itemDto);
+        when(itemMapper.mapToListDto(itemList)).thenReturn(List.of(itemDto));
 
         List<ItemDto> itemDtoList = itemService.getAvailableItem("dEsC", 0, 1);
         assertEquals(1, itemDtoList.size());

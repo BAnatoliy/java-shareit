@@ -95,16 +95,16 @@ class UserServiceImplTest {
         user2.setId(2L);
         user2.setName("UserName2");
         user2.setEmail("u2@ya.ru");
+        List<User> userList = List.of(user, user2);
+        List<UserDto> userDtoList = List.of(userDto, userDto2);
 
         when(userRepository.findAll()).thenReturn(List.of(user, user2));
-        when(userMapper.mapToUserDto(user)).thenReturn(userDto);
-        when(userMapper.mapToUserDto(user2)).thenReturn(userDto2);
+        when(userMapper.mapToListDto(userList)).thenReturn(userDtoList);
 
         List<UserDto> allUsers = userService.getAllUsers();
-        assertEquals(List.of(userDto, userDto2), allUsers);
+        assertEquals(userDtoList, allUsers);
         verify(userRepository).findAll();
-        verify(userMapper).mapToUserDto(user);
-        verify(userMapper).mapToUserDto(user2);
+        verify(userMapper).mapToListDto(userList);
     }
 
     @Test

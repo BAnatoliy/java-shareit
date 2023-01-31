@@ -99,24 +99,23 @@ class ItemRequestServiceImplTest {
         itemRequestDto.setId(1L);
         itemRequestDto.setCreated(LocalDateTime.now());
         itemRequestDto.setDescription("description");
-
         ItemRequestDto itemRequestDto2 = new ItemRequestDto();
         itemRequestDto2.setId(2L);
         itemRequestDto2.setCreated(LocalDateTime.now());
         itemRequestDto2.setDescription("description2");
+        List<ItemRequest> itemRequestList = List.of(itemRequest, itemRequest2);
+        List<ItemRequestDto> itemRequestDtoList = List.of(itemRequestDto, itemRequestDto2);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.findAllByUserIdOrderByCreatedDesc(1L)).thenReturn(
-                List.of(itemRequest, itemRequest2));
-        when(itemRequestMapper.mapToDto(itemRequest)).thenReturn(itemRequestDto);
-        when(itemRequestMapper.mapToDto(itemRequest2)).thenReturn(itemRequestDto2);
+                itemRequestList);
+        when(itemRequestMapper.mapToListDto(itemRequestList)).thenReturn(itemRequestDtoList);
 
         List<ItemRequestDto> usersRequests = itemRequestService.getUsersRequests(1L);
-        assertEquals(List.of(itemRequestDto, itemRequestDto2), usersRequests);
+        assertEquals(itemRequestDtoList, usersRequests);
         verify(userRepository).findById(1L);
         verify(itemRequestRepository).findAllByUserIdOrderByCreatedDesc(1L);
-        verify(itemRequestMapper).mapToDto(itemRequest);
-        verify(itemRequestMapper).mapToDto(itemRequest2);
+        verify(itemRequestMapper).mapToListDto(itemRequestList);
     }
 
     @Test
@@ -145,19 +144,19 @@ class ItemRequestServiceImplTest {
         itemRequestDto2.setId(2L);
         itemRequestDto2.setCreated(LocalDateTime.now());
         itemRequestDto2.setDescription("description2");
+        List<ItemRequest> itemRequestList = List.of(itemRequest, itemRequest2);
+        List<ItemRequestDto> itemRequestDtoList = List.of(itemRequestDto, itemRequestDto2);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(1L)).thenReturn(
-                List.of(itemRequest, itemRequest2));
-        when(itemRequestMapper.mapToDto(itemRequest)).thenReturn(itemRequestDto);
-        when(itemRequestMapper.mapToDto(itemRequest2)).thenReturn(itemRequestDto2);
+                itemRequestList);
+        when(itemRequestMapper.mapToListDto(itemRequestList)).thenReturn(itemRequestDtoList);
 
         List<ItemRequestDto> usersRequests = itemRequestService.getAllRequests(1L, null, null);
-        assertEquals(List.of(itemRequestDto, itemRequestDto2), usersRequests);
+        assertEquals(itemRequestDtoList, usersRequests);
         verify(userRepository).findById(1L);
         verify(itemRequestRepository).findAllByUserIdNotOrderByCreatedDesc(1L);
-        verify(itemRequestMapper).mapToDto(itemRequest);
-        verify(itemRequestMapper).mapToDto(itemRequest2);
+        verify(itemRequestMapper).mapToListDto(itemRequestList);
     }
 
     @Test
@@ -186,19 +185,19 @@ class ItemRequestServiceImplTest {
         itemRequestDto2.setId(2L);
         itemRequestDto2.setCreated(LocalDateTime.now());
         itemRequestDto2.setDescription("description2");
+        List<ItemRequest> itemRequestList = List.of(itemRequest, itemRequest2);
+        List<ItemRequestDto> itemRequestDtoList = List.of(itemRequestDto, itemRequestDto2);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(anyLong(), any(Pageable.class))).thenReturn(
-                new PageImpl<>(new ArrayList<>(List.of(itemRequest, itemRequest2))));
-        when(itemRequestMapper.mapToDto(itemRequest)).thenReturn(itemRequestDto);
-        when(itemRequestMapper.mapToDto(itemRequest2)).thenReturn(itemRequestDto2);
+                new PageImpl<>(new ArrayList<>(itemRequestList)));
+        when(itemRequestMapper.mapToListDto(itemRequestList)).thenReturn(itemRequestDtoList);
 
         List<ItemRequestDto> usersRequests = itemRequestService.getAllRequests(1L, 0, 2);
-        assertEquals(List.of(itemRequestDto, itemRequestDto2), usersRequests);
+        assertEquals(itemRequestDtoList, usersRequests);
         verify(userRepository).findById(1L);
         verify(itemRequestRepository).findAllByUserIdNotOrderByCreatedDesc(anyLong(), any(Pageable.class));
-        verify(itemRequestMapper).mapToDto(itemRequest);
-        verify(itemRequestMapper).mapToDto(itemRequest2);
+        verify(itemRequestMapper).mapToListDto(itemRequestList);
     }
 
     @Test

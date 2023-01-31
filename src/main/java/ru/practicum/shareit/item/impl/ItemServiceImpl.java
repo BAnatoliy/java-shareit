@@ -147,7 +147,7 @@ public class ItemServiceImpl implements ItemService {
             getBookingsAndComments(bookings, item, comments);
         }
         log.debug("Get item`s list with owner`s ID = {}", userId);
-        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+        return itemMapper.mapToListDto(itemList);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class ItemServiceImpl implements ItemService {
             itemList = itemRepository.findAvailableItemByNameAndDescription(text, from, size);
         }
         log.debug("Get item`s list contain {}", text);
-        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+        return  itemMapper.mapToListDto(itemList);
     }
 
     @Override

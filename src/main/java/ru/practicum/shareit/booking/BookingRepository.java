@@ -13,18 +13,18 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
 
     List<Booking> findAllByBooker_IdOrderByStartDesc(Long userId, Pageable pageable);
 
-    List<Booking> findAllByBooker_IdAndEndBeforeOrderByStartDesc(Long userId, LocalDateTime dateTime);
+    List<Booking> findAllByBooker_IdAndEndBeforeOrderByStartDesc(Long userId, LocalDateTime end);
 
     List<Booking> findAllByBooker_IdAndEndBeforeOrderByStartDesc(Long userId,
-                                                                 LocalDateTime dateTime, Pageable pageable);
+                                                                 LocalDateTime end, Pageable pageable);
 
     List<Booking> findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
-            Long userId, LocalDateTime dateTime, LocalDateTime dateTime2);
+            Long userId, LocalDateTime end, LocalDateTime start);
 
     List<Booking> findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
-            Long userId, LocalDateTime dateTime, LocalDateTime dateTime2, Pageable pageable);
+            Long userId, LocalDateTime end, LocalDateTime start, Pageable pageable);
 
-    List<Booking> findAllByBooker_IdAndStartAfterOrderByStartDesc(Long userId, LocalDateTime dateTime);
+    List<Booking> findAllByBooker_IdAndStartAfterOrderByStartDesc(Long userId, LocalDateTime start);
 
     List<Booking> findAllByBooker_IdAndStartAfterOrderByStartDesc(Long userId,
                                                                   LocalDateTime dateTime, Pageable pageable);
@@ -42,22 +42,22 @@ public interface BookingRepository extends PagingAndSortingRepository<Booking, L
     List<Booking> findAllByItem_Id(Long itemId);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime);
+            Long userId, Boolean available, LocalDateTime end);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime, Pageable pageable);
+            Long userId, Boolean available, LocalDateTime end, Pageable pageable);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime);
+            Long userId, Boolean available, LocalDateTime start);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime, Pageable pageable);
+            Long userId, Boolean available, LocalDateTime end, Pageable pageable);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime, LocalDateTime dateTime2);
+            Long userId, Boolean available, LocalDateTime end, LocalDateTime start);
 
     List<Booking> findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
-            Long userId, Boolean available, LocalDateTime dateTime, LocalDateTime dateTime2, Pageable pageable);
+            Long userId, Boolean available, LocalDateTime end, LocalDateTime start, Pageable pageable);
 
     List<Booking> findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(Long userId, BookingStatus bookingStatus);
 

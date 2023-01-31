@@ -264,171 +264,189 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingByBookerTest_whenStateIsAll_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking, booking2);
+        List<BookingDto> bookingDtoList = List.of(bookingDto, bookingDto2);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdOrderByStartDesc(1L))
-                .thenReturn(List.of(booking, booking2));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(State.ALL, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdOrderByStartDesc(1L);
-        assertEquals(List.of(bookingDto, bookingDto2), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsAllFromIs0SizeIs2_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking, booking2);
+        List<BookingDto> bookingDtoList = List.of(bookingDto, bookingDto2);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdOrderByStartDesc(anyLong(), any(CustomPageRequest.class)))
-                .thenReturn(List.of(booking, booking2));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(State.ALL, 0, 2, 1L);
         verify(bookingRepository).findAllByBooker_IdOrderByStartDesc(anyLong(), any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto, bookingDto2), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsPast_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking);
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class)))
-                .thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.PAST, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsPastFromIs0SizeIs1_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking);
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class)))
-                .thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.PAST, 0, 1, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsFuture_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking3);
+        List<BookingDto> bookingDtoList = List.of(bookingDto3);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(
-                anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking3));
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+                anyLong(), any(LocalDateTime.class))).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.FUTURE, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStartAfterOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsFutureFromIs0SizeIs1_shouldGetListBooking() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto3);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(CustomPageRequest.class))).thenReturn(List.of(booking3));
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+        when(bookingMapper.mapToListDto(List.of(booking3))).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.FUTURE, 0, 1, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStartAfterOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class),  any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsCurrent_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking2);
+        List<BookingDto> bookingDtoList = List.of(bookingDto2);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
-                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(List.of(booking2));
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.CURRENT, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto2), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsCurrentFromIs0SizeIs1_shouldGetListBooking() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto2);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(CustomPageRequest.class)))
                 .thenReturn(List.of(booking2));
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+        when(bookingMapper.mapToListDto(List.of(booking2))).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.CURRENT, 0, 1, 1L);
         verify(bookingRepository).findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto2), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsWaiting_shouldGetListBooking() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 1L, BookingStatus.WAITING)).thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+        when(bookingMapper.mapToListDto(List.of(booking))).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.WAITING, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 1L, BookingStatus.WAITING);
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenFromIs0FromIs1StateIsWaiting_shouldGetListBooking() {
+        List<Booking> bookingList = List.of(booking);
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
-                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.WAITING, 0, 1, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 anyLong(), any(BookingStatus.class), any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenStateIsRejected_shouldGetListBooking() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto3);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 1L, BookingStatus.REJECTED)).thenReturn(List.of(booking3));
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+        when(bookingMapper.mapToListDto(List.of(booking3))).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.REJECTED, null, null, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 1L, BookingStatus.REJECTED);
-        assertEquals(List.of(bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByBookerTest_whenFromIs0SizeIs1StateIsRejected_shouldGetListBooking() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto3);
+        List<Booking> bookingList = List.of(booking3);
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByBooker_IdAndStatusIsOrderByStartDesc(
-                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(List.of(booking3));
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+                anyLong(), any(BookingStatus.class), any(CustomPageRequest.class))).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByBooker(
                 State.REJECTED, 0, 1, 1L);
         verify(bookingRepository).findAllByBooker_IdAndStatusIsOrderByStartDesc(
                 anyLong(), any(BookingStatus.class), any(CustomPageRequest.class));
-        assertEquals(List.of(bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
@@ -440,90 +458,100 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingByOwnerTest_whenStateIsAll_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto, bookingDto2, bookingDto3);
+        List<Booking> bookingList = List.of(booking, booking2, booking3);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(
-                4L, true)).thenReturn(List.of(booking, booking2, booking3));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+                4L, true)).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.ALL, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(
                 4L, true);
-        assertEquals(List.of(bookingDto, bookingDto2, bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByOwnerTest_whenStateIsPast_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
+        List<Booking> bookingList = List.of(booking);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class)))
-                .thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.PAST, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByOwnerTest_whenStateIsFuture_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto3);
+        List<Booking> bookingList = List.of(booking3);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class)))
-                .thenReturn(List.of(booking3));
-        when(bookingMapper.mapToDto(booking3)).thenReturn(bookingDto3);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.FUTURE, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto3), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByOwnerTest_whenStateIsCurrent_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto2);
+        List<Booking> bookingList = List.of(booking2);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(List.of(booking2));
-        when(bookingMapper.mapToDto(booking2)).thenReturn(bookingDto2);
+                .thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.CURRENT, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndItem_AvailableAndEndAfterAndStartBeforeOrderByStartDesc(
                 anyLong(), anyBoolean(), any(LocalDateTime.class), any(LocalDateTime.class));
-        assertEquals(List.of(bookingDto2), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByOwnerTest_whenStateIsWaiting_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto2);
+        List<Booking> bookingList = List.of(booking2);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(
-                4L, BookingStatus.WAITING)).thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                4L, BookingStatus.WAITING)).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.WAITING, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(
                 4L, BookingStatus.WAITING);
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 
     @Test
     void getBookingByOwnerTest_whenStateIsRejected_shouldGetListBookings() {
+        List<BookingDto> bookingDtoList = List.of(bookingDto);
+        List<Booking> bookingList = List.of(booking);
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(bookingRepository.findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(
-                4L, BookingStatus.REJECTED)).thenReturn(List.of(booking));
-        when(bookingMapper.mapToDto(booking)).thenReturn(bookingDto);
+                4L, BookingStatus.REJECTED)).thenReturn(bookingList);
+        when(bookingMapper.mapToListDto(bookingList)).thenReturn(bookingDtoList);
 
         List<BookingDto> bookingByBooker = bookingService.getBookingByOwner(
                 State.REJECTED, null, null, 4L);
         verify(bookingRepository).findAllByItem_Owner_IdAndStatusIsOrderByStartDesc(
                 4L, BookingStatus.REJECTED);
-        assertEquals(List.of(bookingDto), bookingByBooker);
+        assertEquals(bookingDtoList, bookingByBooker);
     }
 }

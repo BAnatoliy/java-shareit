@@ -22,7 +22,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -138,7 +137,7 @@ public class BookingServiceImpl implements BookingService {
                             CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case PAST:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, now);
@@ -147,7 +146,7 @@ public class BookingServiceImpl implements BookingService {
                             now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case FUTURE:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now);
@@ -156,7 +155,7 @@ public class BookingServiceImpl implements BookingService {
                             now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case CURRENT:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByBooker_IdAndEndAfterAndStartBeforeOrderByStartDesc(userId,
@@ -166,7 +165,7 @@ public class BookingServiceImpl implements BookingService {
                                     userId, now, now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case WAITING:
                 return getBookingDtosByStatus(BookingStatus.WAITING, state, from, size, userId);
             default:
@@ -194,7 +193,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, true, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case PAST:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndEndBeforeOrderByStartDesc(
@@ -204,7 +203,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, true, now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case FUTURE:
                 if (from == null || size == null) {
                     bookings = bookingRepository.findAllByItem_Owner_IdAndItem_AvailableAndStartAfterOrderByStartDesc(
@@ -214,7 +213,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, true, now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case CURRENT:
                 if (from == null || size == null) {
                     bookings = bookingRepository
@@ -226,7 +225,7 @@ public class BookingServiceImpl implements BookingService {
                             userId, true, now, now, CustomPageRequest.of(from, size));
                 }
                 log.debug(logForParameters, state, size, from);
-                return getBookingDtos(bookings);
+                return bookingMapper.mapToListDto(bookings);
             case WAITING:
                 return getBookingDtosByOwnerAndByStatus(BookingStatus.WAITING, state, from, size, userId);
             default:
@@ -241,12 +240,6 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<BookingDto> getBookingDtos(List<Booking> bookings) {
-        return bookings.stream()
-                .map(bookingMapper::mapToDto)
-                .collect(Collectors.toList());
-    }
-
     private List<BookingDto> getBookingDtosByStatus(BookingStatus status, State state, Integer from,
                                                     Integer size, Long userId) {
         List<Booking> bookings;
@@ -258,7 +251,7 @@ public class BookingServiceImpl implements BookingService {
                     status, CustomPageRequest.of(from, size));
         }
         log.debug(logForParameters, state, size, from);
-        return getBookingDtos(bookings);
+        return bookingMapper.mapToListDto(bookings);
     }
 
     private List<BookingDto> getBookingDtosByOwnerAndByStatus(BookingStatus status, State state, Integer from,
@@ -272,6 +265,6 @@ public class BookingServiceImpl implements BookingService {
                     status, CustomPageRequest.of(from, size));
         }
         log.debug(logForParameters, state, size, from);
-        return getBookingDtos(bookings);
+        return bookingMapper.mapToListDto(bookings);
     }
 }

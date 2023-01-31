@@ -11,6 +11,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -41,6 +42,9 @@ public class ItemRequestMapperTest {
     void mapToItemRequestTest() {
         ItemRequest itemRequestReturn = itemRequestMapper.mapToItemRequest(itemRequestDto);
         assertEquals(itemRequestDto.getId(), itemRequestReturn.getId());
+
+        List<ItemRequestDto> itemRequestDtoList = itemRequestMapper.mapToListDto(List.of(itemRequest));
+        assertEquals(1, itemRequestDtoList.size());
     }
 
     @Test

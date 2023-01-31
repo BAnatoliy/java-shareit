@@ -20,6 +20,7 @@ import ru.practicum.shareit.user.mapper.UserMapperImpl;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,9 +51,15 @@ public class MappersTest {
         assertEquals(userDto.getId(), userDto1.getId());
         assertEquals(userDto.getName(), userDto1.getName());
 
+        List<UserDto> userDtoList = userMapper.mapToListDto(List.of(user));
+        assertEquals(1, userDtoList.size());
+
         ItemDto itemDtoResult = itemMapper.mapToDto(item);
         Item itemResult = itemMapper.mapToItem(itemDtoResult);
         assertEquals(item.getName(), itemResult.getName());
+
+        List<ItemDto> itemDtoList = itemMapper.mapToListDto(List.of(item));
+        assertEquals(1, itemDtoList.size());
 
         CommentDto commentDtoResult = itemMapper.mapToCommentDto(comment);
         CommentRequestDto commentRequestDto = new CommentRequestDto(1L, "text");
@@ -74,5 +81,8 @@ public class MappersTest {
         Booking bookingResult = bookingMapper.mapToBooking(bookingRequestDto);
         assertEquals(booking.getId(), bookingDtoResult.getId());
         assertEquals(bookingRequestDto.getId(), bookingResult.getId());
+
+        List<BookingDto> bookingDtoList = bookingMapper.mapToListDto(List.of(booking));
+        assertEquals(1, bookingDtoList.size());
     }
 }

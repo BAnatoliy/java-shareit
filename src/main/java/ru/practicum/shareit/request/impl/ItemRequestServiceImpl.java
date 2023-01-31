@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -49,9 +48,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         findUserById(userId);
         List<ItemRequest> listRequest = itemRequestRepository.findAllByUserIdOrderByCreatedDesc(userId);
         log.debug("Get user`s request list with ID = {}", userId);
-        return listRequest.stream()
-                .map(itemRequestMapper::mapToDto)
-                .collect(Collectors.toList());
+        return itemRequestMapper.mapToListDto(listRequest);
     }
 
     @Override
@@ -60,8 +57,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestList;
         if (from == null || size == null) {
             log.debug("Parameters are null");
-            itemRequestList = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(userId)
-                    .stream().map(itemRequestMapper::mapToDto).collect(Collectors.toList());
+            itemRequestList = itemRequestMapper.mapToListDto(
+                    itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(userId));
             log.debug("Get all list of request");
             return itemRequestList;
         }
@@ -72,9 +69,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         Page<ItemRequest> itemRequests = itemRequestRepository.findAllByUserIdNotOrderByCreatedDesc(userId,
                 CustomPageRequest.of(from, size));
-        itemRequestList = itemRequests.getContent().stream()
-                .map(itemRequestMapper::mapToDto)
-                .collect(Collectors.toList());
+        itemRequestList = itemRequestMapper.mapToListDto(itemRequests.getContent());
         log.debug("Get page of requests sorted by create date with {} elements from {}", size, from);
         return itemRequestList;
     }

@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,9 +45,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         List<User> userList = userRepository.findAll();
         log.debug("Get user`s list");
-        return userList.stream()
-                .map(userMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return userMapper.mapToListDto(userList);
     }
 
     @Transactional
