@@ -13,11 +13,16 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ItemMapper {
+    @Mapping(target = "requestId", source = "request.id")
     ItemDto mapToDto(Item item);
 
     Item mapToItem(ItemDto itemDto);
+
+    List<ItemDto> mapToListDto(List<Item> itemList);
 
     @Mapping(target = "bookerId", source = "booker", qualifiedByName = "idFromBooker")
     BookingSlimDto mapToSlimDto(Booking booking);

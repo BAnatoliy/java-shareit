@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,9 +28,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = userMapper.mapToUser(userDto);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
         log.debug("User created");
-        return userMapper.mapToUserDto(user);
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
@@ -46,9 +45,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         List<User> userList = userRepository.findAll();
         log.debug("Get user`s list");
-        return userList.stream()
-                .map(userMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return userMapper.mapToListDto(userList);
     }
 
     @Transactional

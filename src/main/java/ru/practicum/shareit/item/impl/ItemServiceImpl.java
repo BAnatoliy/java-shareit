@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.pageableImpl.CustomPageRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -31,16 +33,17 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemMapper itemMapper;
-
 
     public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
                            BookingRepository bookingRepository, CommentRepository commentRepository,
-                           ItemMapper itemMapper) {
+                           ItemRequestRepository itemRequestRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
         this.itemMapper = itemMapper;
     }
 
@@ -55,6 +58,9 @@ public class ItemServiceImpl implements ItemService {
                             userId));
                 }
         ));
+        if (itemDto.getRequestId() != null) {
+            item.setRequest(itemRequestRepository.findById(itemDto.getRequestId()).orElse(null));
+        }
         Item savedItem = itemRepository.save(item);
         log.debug("Item created");
         return itemMapper.mapToDto(savedItem);
@@ -108,38 +114,57 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             List<Booking> bookings = bookingRepository.findAllByItem_Id(itemId);
             List<Comment> comments = commentRepository.findAllByItem_Id(itemId);
-            getItemList(bookings, item, comments);
+            getBookingsAndComments(bookings, item, comments);
         }
         log.debug("Item with ID = {} is found", itemId);
         return itemMapper.mapToDto(item);
     }
 
     @Override
-    public List<ItemDto> getItemsByTheOwner(Long userId) {
+    public List<ItemDto> getItemsByTheOwner(Long userId, Integer from, Integer size) {
         if (userRepository.findById(userId).isEmpty()) {
             throw new EntityNotFoundException("User not found");
         }
 
-        List<Item> itemList = itemRepository.findByOwnerIdOrderById(userId);
+        checkParametersFromAndSize(from, size);
+        List<Item> itemList;
+        if (from == null || size == null) {
+            itemList = itemRepository.findByOwnerIdOrderById(userId);
+        } else {
+            itemList = itemRepository.findByOwnerIdOrderById(userId, CustomPageRequest.of(from, size));
+        }
+        log.debug("Get item list with parameters from = {}, size = {}", from, size);
+
         List<Booking> bookings =
                 bookingRepository.findAllByItem_Owner_IdAndItem_AvailableOrderByStartDesc(userId, true);
-        List<Comment> comments = commentRepository.findAllByItem_IdIn(itemList.stream().map(Item::getId).collect(Collectors.toList()));
+        log.debug("Get bookings list for user with ID = {}", userId);
+
+        List<Comment> comments = commentRepository.findAllByItem_IdIn(itemList.stream()
+                .map(Item::getId).collect(Collectors.toList()));
+        log.debug("Get comments list for items");
 
         for (Item item : itemList) {
-            getItemList(bookings, item, comments);
+            getBookingsAndComments(bookings, item, comments);
         }
         log.debug("Get item`s list with owner`s ID = {}", userId);
-        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+        return itemMapper.mapToListDto(itemList);
     }
 
     @Override
-    public List<ItemDto> getAvailableItem(String text) {
+    public List<ItemDto> getAvailableItem(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        List<Item> itemList = itemRepository.findAvailableItemByNameAndDescription(text);
+        checkParametersFromAndSize(from, size);
+
+        List<Item> itemList;
+        if (from == null || size == null) {
+            itemList = itemRepository.findAvailableItemByNameAndDescription(text);
+        } else {
+            itemList = itemRepository.findAvailableItemByNameAndDescription(text, from, size);
+        }
         log.debug("Get item`s list contain {}", text);
-        return itemList.stream().map(itemMapper::mapToDto).collect(Collectors.toList());
+        return  itemMapper.mapToListDto(itemList);
     }
 
     @Override
@@ -171,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.mapToCommentDto(savedComment);
     }
 
-    private void getItemList(List<Booking> bookings, Item item, List<Comment> comments) {
+    private void getBookingsAndComments(List<Booking> bookings, Item item, List<Comment> comments) {
         List<Booking> itemBookings = bookings.stream()
                 .filter(booking -> booking.getItem().equals(item))
                 .sorted(Comparator.comparing(Booking::getStart))
@@ -197,7 +222,7 @@ public class ItemServiceImpl implements ItemService {
                     nextBooking = booking;
                 }
                 if (item.getNextBooking() != null &&
-                        item.getNextBooking().getStart().isBefore(booking.getStart())) {
+                        item.getNextBooking().getStart().isAfter(booking.getStart())) {
                     nextBooking = booking;
                 }
             }
@@ -210,5 +235,12 @@ public class ItemServiceImpl implements ItemService {
         item.setComments(itemComments);
         item.setLastBooking(lastBooking);
         item.setNextBooking(nextBooking);
+    }
+
+    private void checkParametersFromAndSize(Integer from, Integer size) {
+        if ((from != null && from < 0) || (size != null && size <= 0)) {
+            log.debug("Parameters cannot be negative");
+            throw new ItemCheckException("Parameters cannot be negative");
+        }
     }
 }
