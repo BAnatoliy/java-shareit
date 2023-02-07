@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingSlimDto;
 import ru.practicum.shareit.item.dto.ItemSlimDto;
-import ru.practicum.shareit.user.valid.UserValidGroups;
 
 import java.util.HashSet;
 import java.util.Set;
