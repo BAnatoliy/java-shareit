@@ -24,7 +24,6 @@ public class ItemController {
     @Validated(ItemValidGroups.OnCreate.class)
     public ResponseEntity<Object> createItem(@RequestBody @Valid ItemDto itemDto,
                                              @RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        //return itemService.createItem(itemDto, userId);
         return itemClient.createItem(userId, itemDto);
     }
 
@@ -33,7 +32,6 @@ public class ItemController {
     public ResponseEntity<Object> updateItem(@RequestBody @Valid ItemDto itemDto,
                                              @PathVariable Long itemId,
                                              @RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        //return itemService.updateItem(itemDto, itemId, userId);
         return itemClient.updateItem(userId, itemId, itemDto);
     }
 
@@ -47,7 +45,6 @@ public class ItemController {
     public ResponseEntity<Object> getItemsByTheOwner(@RequestHeader(value = "X-Sharer-User-Id") long userId,
                                             @RequestParam(value = "from", defaultValue = "0") Integer from,
                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        //return itemService.getItemsByTheOwner(userId, from, size);
         return itemClient.getItemsByTheOwner(userId, from, size);
     }
 
@@ -56,7 +53,6 @@ public class ItemController {
                                           @RequestParam(value = "from", defaultValue = "0") Integer from,
                                           @RequestParam(value = "size", defaultValue = "10") Integer size,
                                           @RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        //return itemService.getAvailableItem(text, from, size);
         return itemClient.getAvailableItem(userId, text, from, size);
     }
 
@@ -64,7 +60,6 @@ public class ItemController {
     public ResponseEntity<Object> createComment(@RequestBody @Valid CommentRequestDto commentRequestDto,
                                                 @PathVariable Long itemId,
                                                 @RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        //return itemService.createComment(commentRequestDto, itemId, userId);
         return itemClient.createComment(userId, itemId, commentRequestDto);
     }
 }

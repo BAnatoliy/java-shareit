@@ -8,13 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.shareit.booking.constant.BookingStatus;
-import ru.practicum.shareit.booking.constant.State;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.client.BookingClient;
+import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.exception.ErrorHandler;
 
 import java.time.LocalDateTime;
@@ -35,7 +37,7 @@ class BookingControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
-    private BookingService bookingService;
+    private BookingClient bookingClient;
     @Autowired
     private BookingController bookingController;
     @Autowired
@@ -54,16 +56,12 @@ class BookingControllerTest {
     void createBookingTest() {
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = LocalDateTime.now().plusHours(2);
-        BookingRequestDto bookingRequestDto = new BookingRequestDto();
-        bookingRequestDto.setStart(start);
-        bookingRequestDto.setEnd(end);
-        bookingRequestDto.setItemId(1L);
-        BookingDto bookingDto = new BookingDto();
-        bookingDto.setId(1L);
-        bookingDto.setStart(start);
-        bookingDto.setEnd(end);
-        when(bookingService.createBooking(any(BookingRequestDto.class), anyLong()))
-                .thenReturn(bookingDto);
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.WAITING);
+        ResponseEntity<Object> response = ResponseEntity.ok(bookingRequestDto);
+
+        when(bookingClient.bookItem(anyLong(), any(BookingRequestDto.class)))
+                .thenReturn(response);
 
         MockHttpServletRequestBuilder request = post("/bookings")
                 .header("X-Sharer-User-Id", "1")
@@ -77,16 +75,48 @@ class BookingControllerTest {
 
     @SneakyThrows
     @Test
+    void createBookingTest_whenStartIsBeforeNow_shouldStatusCodeIs400() {
+        LocalDateTime start = LocalDateTime.now().minusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.WAITING);
+
+        MockHttpServletRequestBuilder request = post("/bookings")
+                .header("X-Sharer-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(bookingRequestDto));
+
+        mockMvc.perform(request)
+                .andExpect(status().is(400));
+    }
+
+    @SneakyThrows
+    @Test
+    void createBookingTest_whenStartIsAfterEnd_shouldStatusCodeIs400() {
+        LocalDateTime start = LocalDateTime.now().plusHours(5);
+        LocalDateTime end = LocalDateTime.now().plusHours(2);
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.WAITING);
+
+        MockHttpServletRequestBuilder request = post("/bookings")
+                .header("X-Sharer-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(bookingRequestDto));
+
+        mockMvc.perform(request)
+                .andExpect(status().is(400));
+    }
+
+    @SneakyThrows
+    @Test
     void confirmBooking() {
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = LocalDateTime.now().plusHours(2);
-        BookingDto bookingDto = new BookingDto();
-        bookingDto.setId(1L);
-        bookingDto.setStart(start);
-        bookingDto.setEnd(end);
-        bookingDto.setStatus(BookingStatus.APPROVED);
-        when(bookingService.confirmBooking(1L, true, 1L))
-                .thenReturn(bookingDto);
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.APPROVED);
+        ResponseEntity<Object> response = ResponseEntity.ok(bookingRequestDto);
+        when(bookingClient.confirmBooking(1L, 1L, true))
+                .thenReturn(response);
 
         MockHttpServletRequestBuilder request = patch("/bookings/1")
                 .param("approved", "true")
@@ -103,12 +133,11 @@ class BookingControllerTest {
     void getBookingById() {
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = LocalDateTime.now().plusHours(2);
-        BookingDto bookingDto = new BookingDto();
-        bookingDto.setId(1L);
-        bookingDto.setStart(start);
-        bookingDto.setEnd(end);
-        when(bookingService.getBookingById(1L, 1L))
-                .thenReturn(bookingDto);
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.APPROVED);
+        ResponseEntity<Object> response = ResponseEntity.ok(bookingRequestDto);
+        when(bookingClient.getBooking(1L, 1L))
+                .thenReturn(response);
 
         MockHttpServletRequestBuilder request = get("/bookings/1")
                 .header("X-Sharer-User-Id", "1")
@@ -124,16 +153,13 @@ class BookingControllerTest {
     void getBookingsByBooker() {
         LocalDateTime start = LocalDateTime.now().plusHours(1);
         LocalDateTime end = LocalDateTime.now().plusHours(2);
-        BookingDto bookingDto = new BookingDto();
-        bookingDto.setId(1L);
-        bookingDto.setStart(start);
-        bookingDto.setEnd(end);
-        BookingDto bookingDto2 = new BookingDto();
-        bookingDto2.setId(1L);
-        bookingDto2.setStart(start);
-        bookingDto2.setEnd(end);
-        when(bookingService.getBookingByBooker(any(State.class), anyInt(), anyInt(), anyLong()))
-                .thenReturn(List.of(bookingDto, bookingDto2));
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(
+                1L, 2L, start, end, BookingStatus.WAITING);
+        BookingRequestDto bookingRequestDto2 = new BookingRequestDto(
+                2L, 1L, start, end, BookingStatus.WAITING);
+        ResponseEntity<Object> response = ResponseEntity.ok(List.of(bookingRequestDto, bookingRequestDto2));
+        when(bookingClient.getBookings(anyLong(), any(BookingState.class), anyInt(), anyInt()))
+                .thenReturn(response);
 
         MockHttpServletRequestBuilder request = get("/bookings")
                 .header("X-Sharer-User-Id", "1")

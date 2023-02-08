@@ -26,8 +26,6 @@ public class BookingController {
 			@RequestParam(name = "state", defaultValue = "ALL") BookingState state,
 			@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 			@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-		//BookingState state = BookingState.from(stateParam)
-				//.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
 		log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
 		return bookingClient.getBookings(userId, state, from, size);
 	}
@@ -52,8 +50,6 @@ public class BookingController {
 			@PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
 			@Positive @RequestParam(value = "size", defaultValue = "10") Integer size,
 			@RequestHeader(value = "X-Sharer-User-Id") long userId) {
-		//BookingState state = BookingState.from(stateParam)
-				//.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
 		return bookingClient.getBookingsByOwner(userId, state, from, size);
 	}
 
@@ -64,38 +60,4 @@ public class BookingController {
 			@RequestHeader(value = "X-Sharer-User-Id") long userId) {
 		return bookingClient.confirmBooking(userId, bookingId, approved);
 	}
-
-	/*@PostMapping
-	public BookingDto createBooking(@RequestBody @Valid BookingRequestDto bookingRequestDto,
-									@RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-		return bookingService.createBooking(bookingRequestDto, userId);
-	}*/
-
-	/*@PatchMapping("/{bookingId}")
-	public BookingDto confirmBooking(@PathVariable Long bookingId, @RequestParam(value = "approved") Boolean approved,
-									 @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-		return bookingService.confirmBooking(bookingId, approved, userId);
-	}*/
-
-	/*@GetMapping("/{bookingId}")
-	public BookingDto getBookingById(@PathVariable Long bookingId,
-									 @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-		return bookingService.getBookingById(bookingId, userId);
-	}*/
-
-	/*@GetMapping
-	public List<BookingDto> getBookingsByBooker(@RequestParam(value = "state", defaultValue = "ALL") State state,
-												@RequestParam(value = "from", required = false) Integer from,
-												@RequestParam(value = "size", required = false) Integer size,
-												@RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-		return bookingService.getBookingByBooker(state, from, size, userId);
-	}*/
-
-	/*@GetMapping("/owner")
-	public List<BookingDto> getBookingsByOwner(@RequestParam(value = "state", defaultValue = "ALL") State state,
-											   @RequestParam(value = "from", required = false) Integer from,
-											   @RequestParam(value = "size", required = false) Integer size,
-											   @RequestHeader(value = "X-Sharer-User-Id") Long userId) {
-		return bookingService.getBookingByOwner(state, from, size, userId);
-	}*/
 }

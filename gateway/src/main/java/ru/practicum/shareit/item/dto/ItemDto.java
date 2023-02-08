@@ -23,10 +23,5 @@ public class ItemDto {
     private String description;
     @NotNull(groups = ItemValidGroups.OnCreate.class)
     private Boolean available;
-    //private UserSlimDto owner;
     private Long requestId;
-//    private BookingSlimDto lastBooking;
-//    private BookingSlimDto nextBooking;
-//    private Set<BookingSlimDto> bookings = new HashSet<>();
-//    private Set<CommentDto> comments = new HashSet<>();
 }

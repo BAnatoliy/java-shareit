@@ -5,7 +5,6 @@ import ru.practicum.shareit.booking.constant.State;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 
-//import javax.validation.Valid;
 import java.util.List;
 
 @RestController

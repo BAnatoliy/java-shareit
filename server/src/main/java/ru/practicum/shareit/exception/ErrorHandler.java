@@ -9,17 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-//import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice(basePackages = "ru.practicum.shareit")
 @Slf4j
 public class ErrorHandler {
-
-    /*@ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidError(final ConstraintViolationException e) {
-        return new ErrorResponse("Valid error", e.getMessage());
-    }*/
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)

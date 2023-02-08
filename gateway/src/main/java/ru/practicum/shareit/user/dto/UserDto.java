@@ -19,6 +19,4 @@ public class UserDto {
     @NotBlank(groups = UserValidGroups.OnCreate.class)
     @NotNull(groups = UserValidGroups.OnCreate.class)
     private String name;
-   /* private Set<ItemSlimDto> items = new HashSet<>();
-    private Set<BookingSlimDto> bookings = new HashSet<>();*/
 }

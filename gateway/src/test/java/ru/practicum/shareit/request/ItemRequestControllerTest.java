@@ -1,4 +1,4 @@
-package ru.practicum.shareit.itemRequest;
+package ru.practicum.shareit.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -8,18 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.exception.ErrorHandler;
-import ru.practicum.shareit.item.dto.ItemSlimDtoForRequest;
-import ru.practicum.shareit.request.ItemRequestController;
-import ru.practicum.shareit.request.ItemRequestService;
+import ru.practicum.shareit.request.client.ItemRequestClient;
+import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -41,8 +39,7 @@ class ItemRequestControllerTest {
     @Autowired
     private ItemRequestController itemRequestController;
     @MockBean
-    private ItemRequestService itemRequestService;
-    private ItemRequestDto itemRequestDto;
+    private ItemRequestClient itemRequestClient;
 
     @BeforeEach
     void setUp() {
@@ -50,15 +47,14 @@ class ItemRequestControllerTest {
                 .standaloneSetup(itemRequestController)
                 .setControllerAdvice(errorHandler)
                 .build();
-        Set<ItemSlimDtoForRequest> itemsSlim = Set.of(new ItemSlimDtoForRequest(), new ItemSlimDtoForRequest());
-        itemRequestDto = new ItemRequestDto(1L, "description",
-                LocalDateTime.now(), itemsSlim);
     }
 
     @SneakyThrows
     @Test
     void createTest() {
-        when(itemRequestService.create(any(ItemRequestDto.class), anyLong())).thenReturn(itemRequestDto);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "desc");
+        ResponseEntity<Object> response = ResponseEntity.ok(itemRequestDto);
+        when(itemRequestClient.create(anyLong(), any(ItemRequestDto.class))).thenReturn(response);
 
         MockHttpServletRequestBuilder request = post("/requests")
                 .header("X-Sharer-User-Id", "1")
@@ -72,9 +68,23 @@ class ItemRequestControllerTest {
 
     @SneakyThrows
     @Test
+    void createTest_whenDescriptionIsEmpty_shouldGetStatus400() {
+        ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "   ");
+        MockHttpServletRequestBuilder request = post("/requests")
+                .header("X-Sharer-User-Id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemRequestDto));
+
+        mockMvc.perform(request)
+                .andExpect(status().is(400));
+    }
+
+    @SneakyThrows
+    @Test
     void getUsersRequests() {
-        List<ItemRequestDto> dtoList = List.of(itemRequestDto);
-        when(itemRequestService.getUsersRequests(anyLong())).thenReturn(dtoList);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "desc");
+        ResponseEntity<Object> response = ResponseEntity.ok(List.of(itemRequestDto));
+        when(itemRequestClient.getUsersRequests(anyLong())).thenReturn(response);
 
         MockHttpServletRequestBuilder request = get("/requests")
                 .header("X-Sharer-User-Id", "1")
@@ -88,8 +98,9 @@ class ItemRequestControllerTest {
     @SneakyThrows
     @Test
     void getAllRequests() {
-        List<ItemRequestDto> dtoList = List.of(itemRequestDto);
-        when(itemRequestService.getAllRequests(anyLong(), anyInt(), anyInt())).thenReturn(dtoList);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "desc");
+        ResponseEntity<Object> response = ResponseEntity.ok(List.of(itemRequestDto));
+        when(itemRequestClient.getAllRequests(anyLong(), anyInt(), anyInt())).thenReturn(response);
 
         MockHttpServletRequestBuilder request = get("/requests/all")
                 .header("X-Sharer-User-Id", "1")
@@ -105,7 +116,9 @@ class ItemRequestControllerTest {
     @SneakyThrows
     @Test
     void getItemRequestById() {
-        when(itemRequestService.getItemRequestById(anyLong(), anyLong())).thenReturn(itemRequestDto);
+        ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "desc");
+        ResponseEntity<Object> response = ResponseEntity.ok(itemRequestDto);
+        when(itemRequestClient.getItemRequestById(anyLong(), anyLong())).thenReturn(response);
 
         MockHttpServletRequestBuilder request = get("/requests/1")
                 .header("X-Sharer-User-Id", "1")

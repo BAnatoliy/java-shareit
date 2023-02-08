@@ -14,9 +14,7 @@ import java.time.LocalDateTime;
 public class BookingRequestDto {
     private long id;
     private long itemId;
-    //@FutureOrPresent
     private LocalDateTime start;
-    //@Future
     private LocalDateTime end;
     private BookingStatus status;
 }

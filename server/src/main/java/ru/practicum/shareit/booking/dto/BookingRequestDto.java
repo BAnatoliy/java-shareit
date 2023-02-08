@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.booking.constant.BookingStatus;
-//import ru.practicum.shareit.booking.valid.BookingValid;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-//@BookingValid
 public class BookingRequestDto {
     private Long id;
     private Long itemId;
