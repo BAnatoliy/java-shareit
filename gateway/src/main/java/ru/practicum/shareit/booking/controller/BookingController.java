@@ -22,7 +22,7 @@ public class BookingController {
 	private final BookingClient bookingClient;
 
 	@GetMapping
-	public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
+	public ResponseEntity<Object> getBookings(@Positive @RequestHeader("X-Sharer-User-Id") long userId,
 			@RequestParam(name = "state", defaultValue = "ALL") BookingState state,
 			@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 			@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
@@ -31,15 +31,15 @@ public class BookingController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
+	public ResponseEntity<Object> bookItem(@Positive @RequestHeader("X-Sharer-User-Id") long userId,
 			@RequestBody @Valid BookingRequestDto bookingRequestDto) {
 		log.info("Creating booking {}, userId={}", bookingRequestDto, userId);
 		return bookingClient.bookItem(userId, bookingRequestDto);
 	}
 
 	@GetMapping("/{bookingId}")
-	public ResponseEntity<Object> getBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-			@PathVariable Long bookingId) {
+	public ResponseEntity<Object> getBooking(@Positive @RequestHeader("X-Sharer-User-Id") long userId,
+											 @Positive @PathVariable Long bookingId) {
 		log.info("Get booking {}, userId={}", bookingId, userId);
 		return bookingClient.getBooking(userId, bookingId);
 	}
@@ -49,15 +49,15 @@ public class BookingController {
 			@RequestParam(value = "state", defaultValue = "ALL") BookingState state,
 			@PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
 			@Positive @RequestParam(value = "size", defaultValue = "10") Integer size,
-			@RequestHeader(value = "X-Sharer-User-Id") long userId) {
+			@Positive @RequestHeader(value = "X-Sharer-User-Id") long userId) {
 		return bookingClient.getBookingsByOwner(userId, state, from, size);
 	}
 
 	@PatchMapping("/{bookingId}")
 	public ResponseEntity<Object> confirmBooking(
-			@PathVariable Long bookingId,
+			@Positive @PathVariable Long bookingId,
 			@RequestParam(value = "approved") Boolean approved,
-			@RequestHeader(value = "X-Sharer-User-Id") long userId) {
+			@Positive @RequestHeader(value = "X-Sharer-User-Id") long userId) {
 		return bookingClient.confirmBooking(userId, bookingId, approved);
 	}
 }
